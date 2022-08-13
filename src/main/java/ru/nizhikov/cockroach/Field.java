@@ -11,10 +11,72 @@ public class Field {
 
     public static final char EMPTY = '0';
 
-    private final List<char[]> field;
+    public static final String CAN_T_MOVE_WALL = "Can't move wall";
 
-    private Field(List<char[]> field) {
-        this.field = field;
+    private final List<char[]> fld;
+
+    private final int[] pos;
+
+    private Field(List<char[]> fld, int[] pos) {
+        this.fld = fld;
+        this.pos = pos;
+    }
+
+    public char charAt(int i, int j) {
+        return fld.get(i)[j];
+    }
+
+    public int[] position() {
+        return pos;
+    }
+
+    public void up() {
+        move(COCKROACH, pos[0], pos[1], -1, 0);
+
+        pos[0] -= 1;
+    }
+
+    private void move(char toUp, int i, int j, int idelta, int jdelta) {
+        if (i + idelta < 0 || i + idelta >= fld.size())
+            throw new RuntimeException(CAN_T_MOVE_WALL);
+
+        if (j + jdelta < 0 || j + jdelta >= fld.get(0).length)
+            throw new RuntimeException(CAN_T_MOVE_WALL);
+
+        char possiblyEmpty = fld.get(i + idelta)[j + jdelta];
+
+        if (possiblyEmpty != EMPTY)
+            move(possiblyEmpty, i + idelta, j + jdelta, idelta, jdelta);
+
+        fld.get(i)[j] = EMPTY;
+        fld.get(i + idelta)[j + jdelta] = toUp;
+    }
+
+    public void down() {
+        move(COCKROACH, pos[0], pos[1], 1, 0);
+
+        pos[0] += 1;
+    }
+
+    public void left() {
+        move(COCKROACH, pos[0], pos[1], 0, -1);
+
+        pos[1] -= 1;
+    }
+
+    public void right() {
+        move(COCKROACH, pos[0], pos[1], 0, 1);
+
+        pos[1] += 1;
+    }
+
+    @Override public String toString() {
+        StringBuilder bldr = new StringBuilder();
+
+        for (char[] line : fld)
+            bldr.append(line).append('\n');
+
+        return bldr.toString();
     }
 
     public static Field load(String field) throws IOException {
@@ -27,22 +89,44 @@ public class Field {
 
     public static Field load(Scanner sc) {
         List<char[]> data = new ArrayList<>();
+        int[] position;
 
         String line = sc.nextLine();
         int width = line.length();
 
         int idx = 0;
 
-        data.add(checkLine(line, width, idx));
+        char[] line0 = checkLine(line, width, idx);
+        position = findPosition(line0, idx);
 
-        while (sc.hasNextLine())
-            data.add(checkLine(sc.nextLine(), width, ++idx));
+        data.add(line0);
 
-        return new Field(data);
+        while (sc.hasNextLine()) {
+            line0 = checkLine(sc.nextLine(), width, ++idx);
+            int[] position0 = findPosition(line0, idx);
+
+            if (position0 != null) {
+                if (position != null) {
+                    throw new RuntimeException("Double cockroach position[" +
+                        "first=[" + position[0] + ',' + position[1] + "," +
+                        "],second=[" + position0[0] + ',' + position0[1] + "]]");
+                }
+
+                position = position0;
+            }
+
+            data.add(line0);
+        }
+
+        return new Field(data, position);
     }
 
-    public char charAt(int i, int j) {
-        return field.get(i)[j];
+    private static int[] findPosition(char[] line0, int idx) {
+        for (int i = 0; i < line0.length; i++)
+            if (line0[i] == COCKROACH)
+                return new int[] {idx, i};
+
+        return null;
     }
 
     public static char[] checkLine(String line, int expLength, int idx) {

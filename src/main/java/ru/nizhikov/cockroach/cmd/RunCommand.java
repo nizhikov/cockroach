@@ -1,14 +1,19 @@
-package ru.nizhikov.cockroach;
+package ru.nizhikov.cockroach.cmd;
 
 import java.io.File;
 import java.util.concurrent.Callable;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
+import ru.nizhikov.cockroach.Field;
+import ru.nizhikov.cockroach.ProgRunner;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @CommandLine.Command(name = "run", version = "1.0-SNAPSHOT", description = "Execute cockroach application.")
-public class Run implements Callable<Integer> {
-    private static final Logger LOG = LoggerFactory.getLogger(Run.class.getName());
+public class RunCommand implements Callable<Integer> {
+    private static final Logger LOG = LoggerFactory.getLogger(RunCommand.class.getName());
 
     @CommandLine.Option(names = {"-f", "--field"}, description = "Field", required = true)
     private File field;
@@ -21,6 +26,14 @@ public class Run implements Callable<Integer> {
         ensureExists(src, "source");
 
         Field fld = Field.load(field);
+
+        System.out.print(fld);
+        System.out.println("====");
+
+        System.out.print(new ProgRunner(
+            fld,
+            FileUtils.readFileToString(src, UTF_8)
+        ).run());
 
         return 0;
     }
