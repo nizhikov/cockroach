@@ -9,13 +9,13 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.nizhikov.cockroach.antlr.CockroachBaseListener;
 import ru.nizhikov.cockroach.antlr.CockroachLexer;
 import ru.nizhikov.cockroach.antlr.CockroachParser;
 
-public class ProgRunner extends CockroachBaseListener {
+public class ProgRunner {
     private static final Logger LOG = LoggerFactory.getLogger(ProgRunner.class.getName());
 
     private final Field fld;
@@ -34,35 +34,39 @@ public class ProgRunner extends CockroachBaseListener {
         CockroachParser parser = new CockroachParser(new CommonTokenStream(lexer));
 
         parser.addErrorListener(errorListener);
-        parser.addParseListener(this);
 
-        parser.prog();
+        CockroachParser.ExprsContext exprs = (CockroachParser.ExprsContext)parser.prog().getChild(0);
+
+        for (int i = 0; i < exprs.getChildCount(); i++) {
+            ParseTree expr = exprs.getChild(i);
+
+            if (!(expr instanceof CockroachParser.ExprContext)) // Filter out TerminalNodeImpl.
+                continue;
+
+            ParseTree invoke = expr.getChild(0);
+
+            LOG.info("InvocationOf[ctx=" + invoke + ']');
+
+            if (invoke instanceof CockroachParser.FunctionContext fctx)
+                invoke(fctx);
+            else if (invoke instanceof CockroachParser.RepeatContext rctx) {
+
+                int cnt = Integer.parseInt(rctx.NUM().getText());
+
+                for (int j = 0; j < cnt; j++)
+                    invoke(rctx.function());
+            }
+        }
     }
 
-    @Override public void enterFunction(CockroachParser.FunctionContext ctx) {
+    private void invoke(CockroachParser.FunctionContext ctx) {
         switch (ctx.start.getType()) {
-            case CockroachParser.UP:
-                fld.up();
-
-                break;
-            case CockroachParser.DOWN:
-                fld.down();
-
-                break;
-            case CockroachParser.LEFT:
-                fld.left();
-
-                break;
-            case CockroachParser.RIGHT:
-                fld.right();
-
-                break;
-
-            case CockroachParser.STAY:
-                fld.stay();
-
-                break;
-            default:
+            case CockroachParser.UP -> fld.up();
+            case CockroachParser.DOWN -> fld.down();
+            case CockroachParser.LEFT -> fld.left();
+            case CockroachParser.RIGHT -> fld.right();
+            case CockroachParser.STAY -> fld.stay();
+            default ->
                 throw new IllegalStateException("Unknown function[type=" + ctx.start.getType() + ", text=" + ctx.start.getText() + ']');
         }
     }
