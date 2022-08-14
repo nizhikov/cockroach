@@ -27,13 +27,15 @@ public class RunCommand implements Callable<Integer> {
 
         Field fld = Field.load(field);
 
-        System.out.print(fld);
-        System.out.println("====");
+        fld.setChangeListener(fld0 -> {
+            System.out.print(fld0);
+            System.out.println("====");
+        });
 
-        System.out.print(new ProgRunner(
+        new ProgRunner(
             fld,
             FileUtils.readFileToString(src, UTF_8)
-        ).run());
+        ).run();
 
         return 0;
     }

@@ -9,14 +9,14 @@ public class ProgRunnerTest {
     @Test
     public void testSimplestProgramm() throws IOException {
         Field f = Field.load(
-            "0000000000\n" +
-            "0000000000\n" +
-            "0КОТ000000\n" +
-            "0~00000000\n" +
-            "0000000000");
+            "__________\n" +
+            "__________\n" +
+            "_КОТ______\n" +
+            "_~________\n" +
+            "__________");
 
         assertNotNull(f);
 
-        new ProgRunner(f, "ВВЕРХ\nВНИЗ").run();
+        new ProgRunner(f, "ВВЕРХ\nВНИЗ\nВЛЕВО\nВПРАВО\nСТОЯТЬ").run();
     }
 }

@@ -5,21 +5,52 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 public class Field {
     public static final char COCKROACH = '~';
 
-    public static final char EMPTY = '0';
+    public static final char EMPTY = '_';
 
     public static final String CAN_T_MOVE_WALL = "Can't move wall";
+
+    public static final String UP = "ВВЕРХ";
+
+    public static final String DOWN = "ВНИЗ";
+
+    public static final String LEFT = "ВЛЕВО";
+
+    public static final String RIGHT = "ВПРАВО";
+
+    public static final String STAY = "СТОЯТЬ";
 
     private final List<char[]> fld;
 
     private final int[] pos;
 
+    private String lastCommand;
+
+    private char lastCh = EMPTY;
+
+    private Consumer<Field> lsnr;
+
     private Field(List<char[]> fld, int[] pos) {
         this.fld = fld;
         this.pos = pos;
+    }
+
+    public void setChangeListener(Consumer<Field> lsnr) {
+        this.lsnr = lsnr;
+
+        lsnr.accept(this);
+    }
+
+    public String getLastCommand() {
+        return lastCommand;
+    }
+
+    public char getLastCharacter() {
+        return lastCh;
     }
 
     public char charAt(int i, int j) {
@@ -31,43 +62,55 @@ public class Field {
     }
 
     public void up() {
-        move(COCKROACH, pos[0], pos[1], -1, 0);
-
-        pos[0] -= 1;
+        move(-1, 0, UP);
     }
 
-    private void move(char toUp, int i, int j, int idelta, int jdelta) {
+    public void down() {
+        move(1, 0, DOWN);
+    }
+
+    public void left() {
+        move(0, -1, LEFT);
+    }
+
+    public void right() {
+        move(0, 1, RIGHT);
+    }
+
+    public void stay() {
+        move(0, 0, STAY);
+    }
+
+    private void move(int idelta, int jdelta, String command) {
+        lastCommand = command;
+
+        if (command != STAY) {
+            lastCh = move0(COCKROACH, pos[0], pos[1], idelta, jdelta);
+
+            pos[0] += idelta;
+            pos[1] += jdelta;
+        }
+
+        if (lsnr != null)
+            lsnr.accept(this);
+    }
+
+    private char move0(char toUp, int i, int j, int idelta, int jdelta) {
         if (i + idelta < 0 || i + idelta >= fld.size())
-            throw new RuntimeException(CAN_T_MOVE_WALL);
+            throw new RuntimeException(CAN_T_MOVE_WALL + "[cmd=" + lastCommand + ']');
 
         if (j + jdelta < 0 || j + jdelta >= fld.get(0).length)
-            throw new RuntimeException(CAN_T_MOVE_WALL);
+            throw new RuntimeException(CAN_T_MOVE_WALL + "[cmd=" + lastCommand + ']');
 
         char possiblyEmpty = fld.get(i + idelta)[j + jdelta];
 
         if (possiblyEmpty != EMPTY)
-            move(possiblyEmpty, i + idelta, j + jdelta, idelta, jdelta);
+            move0(possiblyEmpty, i + idelta, j + jdelta, idelta, jdelta);
 
         fld.get(i)[j] = EMPTY;
         fld.get(i + idelta)[j + jdelta] = toUp;
-    }
 
-    public void down() {
-        move(COCKROACH, pos[0], pos[1], 1, 0);
-
-        pos[0] += 1;
-    }
-
-    public void left() {
-        move(COCKROACH, pos[0], pos[1], 0, -1);
-
-        pos[1] -= 1;
-    }
-
-    public void right() {
-        move(COCKROACH, pos[0], pos[1], 0, 1);
-
-        pos[1] += 1;
+        return possiblyEmpty;
     }
 
     @Override public String toString() {

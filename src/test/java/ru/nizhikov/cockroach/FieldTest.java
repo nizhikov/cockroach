@@ -14,11 +14,11 @@ import static ru.nizhikov.cockroach.Field.EMPTY;
 
 public class FieldTest {
     public static final String TEST_FIELD =
-        "0000000000\n" +
-        "0000000000\n" +
-        "0КОТ00яZz0\n" +
-        "0~00000000\n" +
-        "0000000000";
+        "__________\n" +
+        "__________\n" +
+        "_КОТ__яZz_\n" +
+        "_~________\n" +
+        "__________";
 
     @Test
     public void testLoad() throws IOException {
@@ -52,20 +52,20 @@ public class FieldTest {
     @Test
     public void testDoubleCockroachThrows() throws IOException {
         assertThrows(RuntimeException.class, () -> Field.load(
-            "0000~00000\n" +
-            "0000~00000\n"));
+            "____~_____\n" +
+            "____~_____\n"));
     }
 
     @Test
     public void testDifferentStringThrows() throws IOException {
         assertThrows(RuntimeException.class, () -> Field.load(
-            "0000000000\n" +
-            "000000000000\n"));
+            "__________\n" +
+            "____________\n"));
     }
 
     @Test
     public void testWrongCharactersThrows() throws IOException {
-        assertThrows(RuntimeException.class, () -> Field.load("1230"));
+        assertThrows(RuntimeException.class, () -> Field.load("123_"));
     }
 
     @Test
@@ -76,11 +76,11 @@ public class FieldTest {
     @Test
     public void testUp() throws IOException {
         Field f = Field.load(
-            "0\n" +
+            "_\n" +
             "A\n" +
-            "0\n" +
+            "_\n" +
             "~\n" +
-            "0\n"
+            "_\n"
         );
 
         assertArrayEquals(new int[] {3, 0}, f.position());
@@ -88,11 +88,11 @@ public class FieldTest {
         f.up();
 
         assertEquals(
-            "0\n" +
+            "_\n" +
             "A\n" +
             "~\n" +
-            "0\n" +
-            "0\n",
+            "_\n" +
+            "_\n",
             f.toString()
         );
         assertArrayEquals(new int[] {2, 0}, f.position());
@@ -102,9 +102,9 @@ public class FieldTest {
         assertEquals(
             "A\n" +
             "~\n" +
-            "0\n" +
-            "0\n" +
-            "0\n",
+            "_\n" +
+            "_\n" +
+            "_\n",
             f.toString()
         );
         assertArrayEquals(new int[] {1, 0}, f.position());
@@ -116,19 +116,19 @@ public class FieldTest {
     public void testDown() throws IOException {
         Field f = Field.load(
             "~\n" +
-            "0\n" +
+            "_\n" +
             "A\n" +
-            "0\n"
+            "_\n"
         );
         assertArrayEquals(new int[] {0, 0}, f.position());
 
         f.down();
 
         assertEquals(
-            "0\n" +
+            "_\n" +
             "~\n" +
             "A\n" +
-            "0\n",
+            "_\n",
             f.toString()
         );
         assertArrayEquals(new int[] {1, 0}, f.position());
@@ -136,8 +136,8 @@ public class FieldTest {
         f.down();
 
         assertEquals(
-            "0\n" +
-            "0\n" +
+            "_\n" +
+            "_\n" +
             "~\n" +
             "A\n",
             f.toString()
@@ -149,18 +149,18 @@ public class FieldTest {
 
     @Test
     public void testLeft() throws IOException {
-        Field f = Field.load("0A0~0\n");
+        Field f = Field.load("_A_~_\n");
 
         assertArrayEquals(new int[] {0, 3}, f.position());
 
         f.left();
 
-        assertEquals("0A~00\n", f.toString());
+        assertEquals("_A~__\n", f.toString());
         assertArrayEquals(new int[] {0, 2}, f.position());
 
         f.left();
 
-        assertEquals("A~000\n", f.toString());
+        assertEquals("A~___\n", f.toString());
         assertArrayEquals(new int[] {0, 1}, f.position());
 
         assertThrows(RuntimeException.class, f::left, CAN_T_MOVE_WALL);
@@ -168,18 +168,18 @@ public class FieldTest {
 
     @Test
     public void testRight() throws IOException {
-        Field f = Field.load("~0A0\n");
+        Field f = Field.load("~_A_\n");
 
         assertArrayEquals(new int[] {0, 0}, f.position());
 
         f.right();
 
-        assertEquals("0~A0\n", f.toString());
+        assertEquals("_~A_\n", f.toString());
         assertArrayEquals(new int[] {0, 1}, f.position());
 
         f.right();
 
-        assertEquals("00~A\n", f.toString());
+        assertEquals("__~A\n", f.toString());
         assertArrayEquals(new int[] {0, 2}, f.position());
 
         assertThrows(RuntimeException.class, f::right, CAN_T_MOVE_WALL);

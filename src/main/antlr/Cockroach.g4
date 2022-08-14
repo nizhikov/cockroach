@@ -23,6 +23,7 @@ function
     | DOWN
     | LEFT
     | RIGHT
+    | STAY
     ;
 
 LINE_COMMENT
@@ -33,4 +34,5 @@ UP: 'ВВЕРХ';
 DOWN: 'ВНИЗ';
 LEFT: 'ВЛЕВО';
 RIGHT: 'ВПРАВО';
+STAY: 'СТОЯТЬ';
 NEWLINE: '\r'? '\n';

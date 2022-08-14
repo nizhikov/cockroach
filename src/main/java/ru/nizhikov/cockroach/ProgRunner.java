@@ -29,7 +29,7 @@ public class ProgRunner extends CockroachBaseListener {
         this.prog = prog;
     }
 
-    public String run() {
+    public void run() {
         CockroachLexer lexer = new CockroachLexer(CharStreams.fromString(prog));
         CockroachParser parser = new CockroachParser(new CommonTokenStream(lexer));
 
@@ -37,8 +37,6 @@ public class ProgRunner extends CockroachBaseListener {
         parser.addParseListener(this);
 
         parser.prog();
-
-        return fld.toString();
     }
 
     @Override public void enterFunction(CockroachParser.FunctionContext ctx) {
@@ -57,6 +55,11 @@ public class ProgRunner extends CockroachBaseListener {
                 break;
             case CockroachParser.RIGHT:
                 fld.right();
+
+                break;
+
+            case CockroachParser.STAY:
+                fld.stay();
 
                 break;
             default:
