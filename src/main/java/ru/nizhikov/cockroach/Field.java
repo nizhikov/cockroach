@@ -99,8 +99,10 @@ public class Field {
         if (i + idelta < 0 || i + idelta >= fld.size())
             throw new RuntimeException(CAN_T_MOVE_WALL + "[cmd=" + lastCommand + ']');
 
-        if (j + jdelta < 0 || j + jdelta >= fld.get(0).length)
+        if (j + jdelta < 0 || j + jdelta >= fld.get(0).length) {
+            System.out.println(this);
             throw new RuntimeException(CAN_T_MOVE_WALL + "[cmd=" + lastCommand + ']');
+        }
 
         char possiblyEmpty = fld.get(i + idelta)[j + jdelta];
 
@@ -191,6 +193,8 @@ public class Field {
             else if (ch >= 'A' && ch <= 'Z')
                 continue;
             else if (ch >= 'a' && ch <= 'z')
+                continue;
+            else if (ch >= '0' && ch <= '9')
                 continue;
 
             throw new RuntimeException("Wrong character[ch='" + ch + "',line=" + idx + ",idx=" + i + ']');

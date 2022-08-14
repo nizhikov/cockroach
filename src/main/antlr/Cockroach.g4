@@ -9,27 +9,46 @@ prog
     ;
 
 exprs
-    : (expr NEWLINE)* expr
+    : expr+
     ;
 
 expr
-    : function
-    | function LINE_COMMENT
+    : statement
     | repeat
-    | repeat LINE_COMMENT
+    | while
+    | if
     | LINE_COMMENT
     ;
 
-function
+statement
     : UP
     | DOWN
     | LEFT
     | RIGHT
     | STAY
+    | group
     ;
 
 repeat
-    : REPEAT NUM function
+    : REPEAT NUM expr
+    ;
+
+while
+    : WHILE condition expr
+    ;
+
+group
+    : OPEN_BRACKET expr+ CLOSE_BRACKET
+    ;
+
+if
+    : IF condition THEN statement (ELSE statement)?
+    ;
+
+condition
+    : NOT? WORD
+    | NOT? EMPTY
+    | NOT? NUMBER
     ;
 
 LINE_COMMENT
@@ -45,7 +64,14 @@ NOT: 'НЕ';
 EMPTY: 'ПУСТО';
 NUMBER: 'ЦИФРА';
 REPEAT: 'ПОВТОРИ';
-NEWLINE: '\r'? '\n';
+WHILE: 'ПОКА';
+CHAR: 'БУКВА';
+OPEN_BRACKET: '{';
+CLOSE_BRACKET: '}';
+IF: 'ЕСЛИ';
+THEN: 'ТО';
+ELSE: 'ИНАЧЕ';
 WORD: LETTER+;
-LETTER: [A-Za-zА-Яа-я];
+LETTER: [a-zA-Zа-яА-Я];
 NUM: [0-9]+;
+SPACE: [ \r\n\t]+ -> skip;

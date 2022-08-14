@@ -38,37 +38,82 @@ public class ProgRunner {
         CockroachParser.ExprsContext exprs = (CockroachParser.ExprsContext)parser.prog().getChild(0);
 
         for (int i = 0; i < exprs.getChildCount(); i++) {
-            ParseTree expr = exprs.getChild(i);
+            if (exprs.getChild(i) instanceof CockroachParser.ExprContext ectx) { // Filter out TerminalNodeImpl.
+                LOG.info("InvocationOf[ctx=" + ectx + ']');
 
-            if (!(expr instanceof CockroachParser.ExprContext)) // Filter out TerminalNodeImpl.
-                continue;
-
-            ParseTree invoke = expr.getChild(0);
-
-            LOG.info("InvocationOf[ctx=" + invoke + ']');
-
-            if (invoke instanceof CockroachParser.FunctionContext fctx)
-                invoke(fctx);
-            else if (invoke instanceof CockroachParser.RepeatContext rctx) {
-
-                int cnt = Integer.parseInt(rctx.NUM().getText());
-
-                for (int j = 0; j < cnt; j++)
-                    invoke(rctx.function());
+                invoke(ectx);
             }
         }
     }
 
-    private void invoke(CockroachParser.FunctionContext ctx) {
-        switch (ctx.start.getType()) {
-            case CockroachParser.UP -> fld.up();
-            case CockroachParser.DOWN -> fld.down();
-            case CockroachParser.LEFT -> fld.left();
-            case CockroachParser.RIGHT -> fld.right();
-            case CockroachParser.STAY -> fld.stay();
-            default ->
-                throw new IllegalStateException("Unknown function[type=" + ctx.start.getType() + ", text=" + ctx.start.getText() + ']');
+    private void invoke(CockroachParser.StatementContext sctx) {
+        if (sctx.group() != null) {
+            CockroachParser.GroupContext gctx = sctx.group();
+
+            int cnt = gctx.getChildCount();
+
+            for (int i = 0; i < cnt; i++)
+                if (gctx.getChild(i) instanceof CockroachParser.ExprContext ectx0)
+                    invoke(ectx0);
+        } else {
+            switch (sctx.start.getType()) {
+                case CockroachParser.UP -> fld.up();
+                case CockroachParser.DOWN -> fld.down();
+                case CockroachParser.LEFT -> fld.left();
+                case CockroachParser.RIGHT -> fld.right();
+                case CockroachParser.STAY -> fld.stay();
+                default -> throw new IllegalStateException("Unknown function[" +
+                    "type=" + sctx.start.getType() +
+                    ", text=" + sctx.start.getText() + ']');
+            }
         }
+    }
+
+    private void invoke(CockroachParser.ExprContext ectx) {
+        if (ectx.statement() != null)
+            invoke(ectx.statement());
+        else if (ectx.repeat() != null) {
+            CockroachParser.RepeatContext rctx = ectx.repeat();
+
+            int cnt = Integer.parseInt(rctx.NUM().getText());
+
+            for (int j = 0; j < cnt; j++)
+                invoke(rctx.expr());
+        }
+        else if (ectx.while_() != null) {
+            CockroachParser.WhileContext wctx = ectx.while_();
+
+            while(eval(wctx.condition()))
+                invoke(wctx.expr());
+        }
+        else if (ectx.if_() != null) {
+            CockroachParser.IfContext ictx = ectx.if_();
+            if (eval(ictx.condition()))
+                invoke(ictx.statement(0));
+            else
+                invoke(ictx.statement(1));
+        }
+    }
+
+    private boolean eval(CockroachParser.ConditionContext condition) {
+        boolean res;
+
+        if (condition.EMPTY() != null)
+            res = fld.getLastCharacter() == Field.EMPTY;
+        else if (condition.WORD() != null) {
+            String filter = condition.WORD().getText();
+
+            if (filter.length() > 1)
+                throw new RuntimeException("Only one letter condition supported");
+
+            res = fld.getLastCharacter() == filter.charAt(0);
+        }
+        else if (condition.NUMBER() != null)
+            res = fld.getLastCharacter() >= '0' && fld.getLastCharacter() <= '9';
+        else
+            throw new IllegalStateException("Unknown condition[ctx=" + condition + ']');
+
+        return condition.NOT() != null ? !res : res;
     }
 
     private static class ThrowErrorListener implements ANTLRErrorListener {

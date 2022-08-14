@@ -65,7 +65,7 @@ public class FieldTest {
 
     @Test
     public void testWrongCharactersThrows() throws IOException {
-        assertThrows(RuntimeException.class, () -> Field.load("123_"));
+        assertThrows(RuntimeException.class, () -> Field.load("#_"));
     }
 
     @Test
