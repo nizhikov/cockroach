@@ -28,8 +28,8 @@ public class RunCommand implements Callable<Integer> {
         Field fld = Field.load(field);
 
         fld.setChangeListener(fld0 -> {
-            System.out.print(fld0);
-            System.out.println("====");
+            System.out.print(fld0.toString(true));
+            System.out.println();
         });
 
         new ProgRunner(

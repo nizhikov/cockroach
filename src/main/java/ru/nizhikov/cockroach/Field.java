@@ -116,10 +116,33 @@ public class Field {
     }
 
     @Override public String toString() {
+        return toString(false);
+    }
+
+    public String toString(boolean pretty) {
         StringBuilder bldr = new StringBuilder();
 
-        for (char[] line : fld)
-            bldr.append(line).append('\n');
+        if (pretty) {
+            bldr.append("[command=" + lastCommand + ", char=" + lastCh + ']');
+            bldr.append("\n");
+
+            for (int i = 0; i < fld.get(0).length + 2; i++)
+                bldr.append('_');
+        }
+
+        bldr.append("\n");
+
+        for (char[] line : fld) {
+            if (pretty)
+                bldr.append('|');
+
+            bldr.append(line);
+
+            if (pretty)
+                bldr.append('|');
+
+            bldr.append('\n');
+        }
 
         return bldr.toString();
     }
