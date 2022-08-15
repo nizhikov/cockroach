@@ -1,49 +1,49 @@
-plugins {
-    id 'java'
-    id 'application'
-    id 'antlr'
-}
-
-group 'ru.nizhikov'
-version '1.0-SNAPSHOT'
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    antlr 'org.antlr:antlr4:4.10.1'
-
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
-
-    implementation 'info.picocli:picocli:4.6.3'
-    implementation 'org.slf4j:slf4j-api:1.7.36'
-    implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.18.0'
-    implementation 'org.apache.logging.log4j:log4j-core:2.18.0'
-    implementation 'commons-io:commons-io:2.11.0'
-}
-
-test {
-    useJUnitPlatform()
-}
-
-generateGrammarSource {
-    outputDirectory = new File("${project.buildDir}/generated-src/antlr/main/ru/nizhikov/cockroach/antlr".toString())
-}
-
-jar {
-    manifest {
-        attributes(
-            "Main-Class" : "ru.nizhikov.cockroach.cmd.Main",
-            "Class-Path" : configurations.runtimeClasspath.collect { it.getName() }.join(' ')
-        )
+project (":console") {
+    repositories {
+        mavenCentral()
     }
+
+    apply plugin: 'java'
+    apply plugin: 'antlr'
+
+    group 'ru.nizhikov'
+    version '1.0-SNAPSHOT'
+
+    dependencies {
+        antlr 'org.antlr:antlr4:4.10.1'
+
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+
+        implementation 'info.picocli:picocli:4.6.3'
+        implementation 'org.slf4j:slf4j-api:1.7.36'
+        implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.18.0'
+        implementation 'org.apache.logging.log4j:log4j-core:2.18.0'
+        implementation 'commons-io:commons-io:2.11.0'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    generateGrammarSource {
+        outputDirectory = new File("${project.buildDir}/generated-src/antlr/main/ru/nizhikov/cockroach/antlr".toString())
+    }
+
+    jar {
+        manifest {
+            attributes(
+                "Main-Class" : "ru.nizhikov.cockroach.cmd.Main",
+                "Class-Path" : configurations.runtimeClasspath.collect { it.getName() }.join(' ')
+            )
+        }
+    }
+
+    task copyToLib(type: Copy) {
+        into "${buildDir}/libs"
+        from configurations.runtimeClasspath
+    }
+
+    jar.dependsOn(copyToLib)
 }
 
-task copyToLib(type: Copy) {
-    into "${buildDir}/libs"
-    from configurations.runtimeClasspath
-}
-
-jar.dependsOn(copyToLib)
