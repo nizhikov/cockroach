@@ -3,6 +3,7 @@ package ru.nizhikov.cockroach;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -11,6 +12,7 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
+import org.antlr.v4.runtime.tree.ParseTree;
 import ru.nizhikov.cockroach.antlr.CockroachLexer;
 import ru.nizhikov.cockroach.antlr.CockroachParser;
 
@@ -22,6 +24,12 @@ public class ProgRunner {
     private final Map<String, CockroachParser.ProcContext> procs = new HashMap<>();
 
     private final ANTLRErrorListener errorListener = new ThrowErrorListener();
+
+    private ParseTree prev;
+
+    private ParseTree next;
+
+    private Stack<ParseTree> stack = new Stack<>();
 
     public ProgRunner(Field fld, String prog) {
         this.fld = fld;
@@ -74,7 +82,11 @@ public class ProgRunner {
             if (pctx == null)
                 throw new RuntimeException("Unknown procedure[name=" + name + ']');
 
+            stack.push(pctx);
+
             invoke(pctx.exprs());
+
+            stack.pop();
         }
         else
             throw new IllegalStateException("Unknown expression[cls=" + expr.getClass().getSimpleName() + ", ctx="+ expr + ']');
@@ -85,6 +97,9 @@ public class ProgRunner {
             CockroachParser.GroupContext gctx = statement.group();
             invoke(gctx.exprs());
         } else {
+            prev = next;
+            next = statement;
+
             switch (statement.start.getType()) {
                 case CockroachParser.UP -> fld.up();
                 case CockroachParser.DOWN -> fld.down();
@@ -102,21 +117,33 @@ public class ProgRunner {
         boolean res;
 
         if (condition.EMPTY() != null)
-            res = fld.getLastCharacter() == Field.EMPTY;
+            res = fld.lastChar() == Field.EMPTY;
         else if (condition.id() != null) {
             String filter = condition.id().getText();
 
             if (filter.length() > 1)
                 throw new RuntimeException("Only one letter condition supported");
 
-            res = fld.getLastCharacter() == filter.charAt(0);
+            res = fld.lastChar() == filter.charAt(0);
         }
         else if (condition.NUMBER() != null)
-            res = fld.getLastCharacter() >= '0' && fld.getLastCharacter() <= '9';
+            res = fld.lastChar() >= '0' && fld.lastChar() <= '9';
         else
             throw new IllegalStateException("Unknown condition[ctx=" + condition + ']');
 
         return condition.NOT() != null ? !res : res;
+    }
+
+    public ParseTree prev() {
+        return prev;
+    }
+
+    public ParseTree next() {
+        return next;
+    }
+
+    public Stack<ParseTree> stack() {
+        return stack;
     }
 
     private static class ThrowErrorListener implements ANTLRErrorListener {

@@ -14,21 +14,9 @@ public class Field {
 
     public static final String CAN_T_MOVE_WALL = "Can't move wall";
 
-    public static final String UP = "ВВЕРХ";
-
-    public static final String DOWN = "ВНИЗ";
-
-    public static final String LEFT = "ВЛЕВО";
-
-    public static final String RIGHT = "ВПРАВО";
-
-    public static final String STAY = "СТОЯТЬ";
-
     private final List<char[]> fld;
 
     private final int[] pos;
-
-    private String lastCommand;
 
     private char lastCh = EMPTY;
 
@@ -39,21 +27,17 @@ public class Field {
         this.pos = pos;
     }
 
-    public void setChangeListener(Consumer<Field> lsnr) {
+    public void changeListener(Consumer<Field> lsnr) {
         this.lsnr = lsnr;
 
         lsnr.accept(this);
     }
 
-    public String getLastCommand() {
-        return lastCommand;
-    }
-
-    public char getLastCharacter() {
+    public char lastChar() {
         return lastCh;
     }
 
-    public int getHeight() {
+    public int height() {
         return fld.size();
     }
 
@@ -66,46 +50,44 @@ public class Field {
     }
 
     public void up() {
-        move(-1, 0, UP);
+        move(-1, 0);
     }
 
     public void down() {
-        move(1, 0, DOWN);
+        move(1, 0);
     }
 
     public void left() {
-        move(0, -1, LEFT);
+        move(0, -1);
     }
 
     public void right() {
-        move(0, 1, RIGHT);
+        move(0, 1);
     }
 
     public void stay() {
-        move(0, 0, STAY);
+        move(0, 0);
     }
 
-    private void move(int idelta, int jdelta, String command) {
-        lastCommand = command;
+    private void move(int idelta, int jdelta) {
+        if (lsnr != null)
+            lsnr.accept(this);
 
-        if (command != STAY) {
+        if (idelta != 0 || jdelta != 0) {
             lastCh = move0(COCKROACH, pos[0], pos[1], idelta, jdelta);
 
             pos[0] += idelta;
             pos[1] += jdelta;
         }
-
-        if (lsnr != null)
-            lsnr.accept(this);
     }
 
     private char move0(char toUp, int i, int j, int idelta, int jdelta) {
         if (i + idelta < 0 || i + idelta >= fld.size())
-            throw new RuntimeException(CAN_T_MOVE_WALL + "[cmd=" + lastCommand + ']');
+            throw new RuntimeException(CAN_T_MOVE_WALL);
 
         if (j + jdelta < 0 || j + jdelta >= fld.get(0).length) {
             System.out.println(this);
-            throw new RuntimeException(CAN_T_MOVE_WALL + "[cmd=" + lastCommand + ']');
+            throw new RuntimeException(CAN_T_MOVE_WALL);
         }
 
         char possiblyEmpty = fld.get(i + idelta)[j + jdelta];
@@ -127,7 +109,6 @@ public class Field {
         StringBuilder bldr = new StringBuilder();
 
         if (pretty) {
-            bldr.append("[command=" + lastCommand + ", char=" + lastCh + ']');
             bldr.append("\n");
 
             for (int i = 0; i < fld.get(0).length + 2; i++)
