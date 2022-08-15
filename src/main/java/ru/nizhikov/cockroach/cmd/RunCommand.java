@@ -2,6 +2,7 @@ package ru.nizhikov.cockroach.cmd;
 
 import java.io.File;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,15 +28,27 @@ public class RunCommand implements Callable<Integer> {
 
         Field fld = Field.load(field);
 
+        AtomicBoolean first = new AtomicBoolean(true);
+
         fld.setChangeListener(fld0 -> {
+            if (!first.get()) {
+                System.out.print(String.format("\033[%dA", fld0.getHeight() + 2)); // Move up
+                System.out.print("\033[2K");
+            }
+
             System.out.print(fld0.toString(true));
-            System.out.println();
+
+            try {
+                Thread.sleep(1000);
+            }
+            catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            first.set(false);
         });
 
-        new ProgRunner(
-            fld,
-            FileUtils.readFileToString(src, UTF_8)
-        ).run();
+        new ProgRunner(fld, FileUtils.readFileToString(src, UTF_8)).run();
 
         return 0;
     }

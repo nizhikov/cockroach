@@ -53,6 +53,10 @@ public class Field {
         return lastCh;
     }
 
+    public int getHeight() {
+        return fld.size();
+    }
+
     public char charAt(int i, int j) {
         return fld.get(i)[j];
     }

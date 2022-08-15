@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'application'
     id 'antlr'
 }
 
@@ -20,7 +21,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.36'
     implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.18.0'
     implementation 'org.apache.logging.log4j:log4j-core:2.18.0'
-    implementation 'commons-io:commons-io:2.8.0'
+    implementation 'commons-io:commons-io:2.11.0'
 }
 
 test {
@@ -30,3 +31,19 @@ test {
 generateGrammarSource {
     outputDirectory = new File("${project.buildDir}/generated-src/antlr/main/ru/nizhikov/cockroach/antlr".toString())
 }
+
+jar {
+    manifest {
+        attributes(
+            "Main-Class" : "ru.nizhikov.cockroach.cmd.Main",
+            "Class-Path" : configurations.runtimeClasspath.collect { it.getName() }.join(' ')
+        )
+    }
+}
+
+task copyToLib(type: Copy) {
+    into "${buildDir}/libs"
+    from configurations.runtimeClasspath
+}
+
+jar.dependsOn(copyToLib)
