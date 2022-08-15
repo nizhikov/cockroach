@@ -67,6 +67,12 @@ public class ProgRunner {
         }
         else if (expr.if_() != null) {
             CockroachParser.IfContext ictx = expr.if_();
+
+            prev = next;
+            next = ictx;
+
+            fld.stay(); // Trigger on change listener.
+
             if (eval(ictx.condition()))
                 invoke(ictx.statement(0));
             else

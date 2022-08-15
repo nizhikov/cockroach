@@ -59,13 +59,8 @@ public class RunCommand implements Callable<Integer> {
                 System.out.print("\033[2K");
             }
 
-            ParseTree prev = runner.prev();
-            ParseTree next = runner.next();
-
             if (debug) {
-                System.out.println("[prev=" + (prev == null ? "null" : prev.getText()) +
-                    ", next=" + (next == null ? "null" : next.getText()) +
-                    ", char=" + fld.lastChar() + ']');
+                System.out.println("[prev=" + toString(runner.prev()) + ", next=" + toString(runner.next()) + ", char=" + fld.lastChar() + ']');
 
                 String stack = "[stack";
 
@@ -110,6 +105,15 @@ public class RunCommand implements Callable<Integer> {
         fld.stay(); // To trigger change listener and output last field state.
 
         return 0;
+    }
+
+    private static String toString(ParseTree item) {
+        if (item == null)
+            return "null";
+        else if (item instanceof CockroachParser.IfContext ictx)
+            return "ЕСЛИ " + ictx.condition().getText();
+        else
+            return item.getText();
     }
 
     private void ensureExists(File file, String name) {
