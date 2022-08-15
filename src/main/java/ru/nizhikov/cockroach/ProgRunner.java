@@ -11,14 +11,10 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ru.nizhikov.cockroach.antlr.CockroachLexer;
 import ru.nizhikov.cockroach.antlr.CockroachParser;
 
 public class ProgRunner {
-    private static final Logger LOG = LoggerFactory.getLogger(ProgRunner.class.getName());
-
     private final Field fld;
 
     private final String prog;
@@ -41,62 +37,38 @@ public class ProgRunner {
     }
 
     private void invoke(CockroachParser.ExprsContext exprs) {
-        for (int i = 0; i < exprs.getChildCount(); i++) {
-            if (exprs.getChild(i) instanceof CockroachParser.ExprContext ectx) { // Filter out TerminalNodeImpl.
-                LOG.info("InvocationOf[ctx=" + ectx + ']');
-
-                invoke(ectx);
-            }
-        }
+        exprs.expr().forEach(this::invoke);
     }
 
-    private void invoke(CockroachParser.StatementContext sctx) {
-        if (sctx.group() != null) {
-            CockroachParser.GroupContext gctx = sctx.group();
-            invoke(gctx.exprs());
-        } else {
-            switch (sctx.start.getType()) {
-                case CockroachParser.UP -> fld.up();
-                case CockroachParser.DOWN -> fld.down();
-                case CockroachParser.LEFT -> fld.left();
-                case CockroachParser.RIGHT -> fld.right();
-                case CockroachParser.STAY -> fld.stay();
-                default -> throw new IllegalStateException("Unknown function[" +
-                    "type=" + sctx.start.getType() +
-                    ", text=" + sctx.start.getText() + ']');
-            }
-        }
-    }
-
-    private void invoke(CockroachParser.ExprContext ectx) {
-        if (ectx.statement() != null)
-            invoke(ectx.statement());
-        else if (ectx.repeat() != null) {
-            CockroachParser.RepeatContext rctx = ectx.repeat();
+    private void invoke(CockroachParser.ExprContext expr) {
+        if (expr.statement() != null)
+            invoke(expr.statement());
+        else if (expr.repeat() != null) {
+            CockroachParser.RepeatContext rctx = expr.repeat();
 
             int cnt = Integer.parseInt(rctx.NUM().getText());
 
             for (int j = 0; j < cnt; j++)
                 invoke(rctx.expr());
         }
-        else if (ectx.while_() != null) {
-            CockroachParser.WhileContext wctx = ectx.while_();
+        else if (expr.while_() != null) {
+            CockroachParser.WhileContext wctx = expr.while_();
 
             while(eval(wctx.condition()))
                 invoke(wctx.expr());
         }
-        else if (ectx.if_() != null) {
-            CockroachParser.IfContext ictx = ectx.if_();
+        else if (expr.if_() != null) {
+            CockroachParser.IfContext ictx = expr.if_();
             if (eval(ictx.condition()))
                 invoke(ictx.statement(0));
             else
                 invoke(ictx.statement(1));
         }
-        else if (ectx.proc() != null) {
-            procs.put(ectx.proc().id().getText(), ectx.proc());
+        else if (expr.proc() != null) {
+            procs.put(expr.proc().id().getText(), expr.proc());
         }
-        else if (ectx.id() != null) {
-            String name = ectx.id().getText();
+        else if (expr.id() != null) {
+            String name = expr.id().getText();
             CockroachParser.ProcContext pctx = procs.get(name);
 
             if (pctx == null)
@@ -105,7 +77,25 @@ public class ProgRunner {
             invoke(pctx.exprs());
         }
         else
-            throw new IllegalStateException("Unknown expression[cls=" + ectx.getClass().getSimpleName() + ", ctx="+ ectx + ']');
+            throw new IllegalStateException("Unknown expression[cls=" + expr.getClass().getSimpleName() + ", ctx="+ expr + ']');
+    }
+
+    private void invoke(CockroachParser.StatementContext statement) {
+        if (statement.group() != null) {
+            CockroachParser.GroupContext gctx = statement.group();
+            invoke(gctx.exprs());
+        } else {
+            switch (statement.start.getType()) {
+                case CockroachParser.UP -> fld.up();
+                case CockroachParser.DOWN -> fld.down();
+                case CockroachParser.LEFT -> fld.left();
+                case CockroachParser.RIGHT -> fld.right();
+                case CockroachParser.STAY -> fld.stay();
+                default -> throw new IllegalStateException("Unknown function[" +
+                    "type=" + statement.start.getType() +
+                    ", text=" + statement.start.getText() + ']');
+            }
+        }
     }
 
     private boolean eval(CockroachParser.ConditionContext condition) {

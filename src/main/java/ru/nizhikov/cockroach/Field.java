@@ -128,9 +128,9 @@ public class Field {
 
             for (int i = 0; i < fld.get(0).length + 2; i++)
                 bldr.append('_');
-        }
 
-        bldr.append("\n");
+            bldr.append("\n");
+        }
 
         for (char[] line : fld) {
             if (pretty)
