@@ -17,6 +17,7 @@ expr
     | repeat
     | while
     | if
+    | proc
     | LINE_COMMENT
     ;
 
@@ -45,6 +46,10 @@ if
     : IF condition THEN statement (ELSE statement)?
     ;
 
+proc
+    : THIS ID exprs END
+    ;
+
 condition
     : NOT? WORD
     | NOT? EMPTY
@@ -71,7 +76,11 @@ CLOSE_BRACKET: '}';
 IF: 'ЕСЛИ';
 THEN: 'ТО';
 ELSE: 'ИНАЧЕ';
+THIS: 'ЭТО';
+END: 'КОНЕЦ';
+ID: LETTER(LETTER|DIGIT)+;
 WORD: LETTER+;
 LETTER: [a-zA-Zа-яА-Я];
-NUM: [0-9]+;
+NUM: DIGIT+;
+DIGIT: [0-9];
 SPACE: [ \r\n\t]+ -> skip;

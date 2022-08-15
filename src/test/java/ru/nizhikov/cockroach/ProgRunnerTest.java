@@ -1,145 +1,73 @@
 package ru.nizhikov.cockroach;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Scanner;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ProgRunnerTest {
+    private final Logger log = LoggerFactory.getLogger(ProgRunnerTest.class);
+
     @Test
-    public void testSimplestProgramm() throws IOException {
-        Field f = Field.load(
-            "__________\n" +
-            "__________\n" +
-            "_КОТ______\n" +
-            "_~________\n" +
-            "__________");
+    public void testAll() throws IOException {
+        int i = 0;
+        InputStream f = this.getClass().getResourceAsStream("/progs/test" + i + ".txt");
+
+        do {
+            log.info("Testing file[f=/progs/test" + i + ".txt" + ']');
+
+            testFile(f);
+            i++;
+
+            f = this.getClass().getResourceAsStream("/progs/test" + i + ".txt");
+        }while (f != null);
+
+    }
+
+    private void testFile(InputStream file) throws IOException {
+        Scanner sc = new Scanner(file);
+
+        StringBuilder startField = new StringBuilder();
+        StringBuilder endField = new StringBuilder();
+        StringBuilder prog = new StringBuilder();
+
+        String line = sc.nextLine();
+
+        while (!line.isEmpty()) {
+            startField.append(line).append("\n");
+            line = sc.nextLine();
+        }
+
+        line = sc.nextLine();
+
+        while (!line.isEmpty()) {
+            prog.append(line).append("\n");
+            line = sc.nextLine();
+        }
+
+        line = sc.nextLine();
+
+        endField.append(line).append("\n");
+
+        while (sc.hasNextLine()) {
+            line = sc.nextLine();
+            if (line.isEmpty())
+                break;
+
+            endField.append(line).append("\n");
+        }
+
+        Field f = Field.load(startField.toString());
 
         assertNotNull(f);
 
-        new ProgRunner(f, "ВВЕРХ\nВНИЗ\nВЛЕВО\nВПРАВО\nСТОЯТЬ").run();
-    }
+        new ProgRunner(f, prog.toString()).run();
 
-    @Test
-    public void testRepeat() throws IOException {
-        Field f = Field.load("~___");
-
-        new ProgRunner(f, "ВПРАВО ПОВТОРИ 2 { ВПРАВО }").run();
-
-        assertEquals("___~\n", f.toString());
-    }
-
-    @Test
-    public void testWhileEmpty() throws IOException {
-        Field f = Field.load("~_А_\n");
-
-        new ProgRunner(f, "ПОКА ПУСТО ВПРАВО").run();
-
-        assertEquals("__~А\n", f.toString());
-
-        f = Field.load("~__А_\n");
-
-        new ProgRunner(f, "ВПРАВО ПОКА ПУСТО { ВПРАВО }").run();
-
-        assertEquals("___~А\n", f.toString());
-    }
-
-    @Test
-    public void testWhileNotEmpty() throws IOException {
-        Field f = Field.load(
-            "____\n" +
-            "ААА_\n" +
-            "~___\n"
-        );
-
-        new ProgRunner(f, "ВВЕРХ ПОКА НЕ ПУСТО { ВНИЗ ВПРАВО ВВЕРХ }").run();
-
-        assertEquals(
-            "ААА_\n" +
-            "___~\n" +
-            "____\n", f.toString());
-    }
-
-    @Test
-    public void testWhileLetter() throws IOException {
-        Field f = Field.load(
-            "____\n" +
-            "ААА_\n" +
-            "~___\n"
-        );
-
-        new ProgRunner(f, "ВВЕРХ ПОКА А { ВНИЗ ВПРАВО ВВЕРХ }").run();
-
-        assertEquals(
-            "ААА_\n" +
-            "___~\n" +
-            "____\n", f.toString());
-    }
-
-    @Test
-    public void testWhileNotLetter() throws IOException {
-        Field f = Field.load("~_А_\n");
-
-        new ProgRunner(f, "ПОКА НЕ А ВПРАВО").run();
-
-        assertEquals("__~А\n", f.toString());
-    }
-
-    @Test
-    public void testWhileNumber() throws IOException {
-        Field f = Field.load(
-            "____\n" +
-            "888_\n" +
-            "~___\n"
-        );
-
-        new ProgRunner(f, "ВВЕРХ ПОКА ЦИФРА { ВНИЗ ВПРАВО ВВЕРХ }").run();
-
-        assertEquals(
-            "888_\n" +
-            "___~\n" +
-            "____\n", f.toString());
-    }
-
-    @Test
-    public void testWhileNotNumber() throws IOException {
-        Field f = Field.load("~_7_\n");
-
-        new ProgRunner(f, "ПОКА НЕ ЦИФРА ВПРАВО").run();
-
-        assertEquals("__~7\n", f.toString());
-    }
-
-    @Test
-    public void testIf() throws IOException {
-        Field f = Field.load(
-            "_А_\n" +
-            "~А_\n"
-        );
-
-        new ProgRunner(f, "ВПРАВО ЕСЛИ А ТО { ВЛЕВО ВВЕРХ ВПРАВО }").run();
-
-        assertEquals(
-            "_~А\n" +
-            "__А\n", f.toString());
-    }
-
-    @Test
-    public void testIfElse() throws IOException {
-        Field f = Field.load(
-            "_____\n" +
-            "_____\n" +
-            "А1А1_\n" +
-            "~____\n"
-        );
-
-        new ProgRunner(f, "ПОВТОРИ 4 { ВВЕРХ ЕСЛИ ЦИФРА ТО ВНИЗ ИНАЧЕ { ВВЕРХ ВНИЗ ВНИЗ } ВПРАВО } ").run();
-
-        assertEquals(
-            "А_А__\n" +
-            "_1_1_\n" +
-            "_____\n" +
-            "____~\n", f.toString());
+        assertEquals(endField.toString(), f.toString());
     }
 }
