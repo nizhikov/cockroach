@@ -18,6 +18,7 @@ expr
     | while
     | if
     | proc
+    | id
     | LINE_COMMENT
     ;
 
@@ -39,7 +40,7 @@ while
     ;
 
 group
-    : OPEN_BRACKET expr+ CLOSE_BRACKET
+    : OPEN_BRACKET exprs CLOSE_BRACKET
     ;
 
 if
@@ -47,19 +48,20 @@ if
     ;
 
 proc
-    : THIS ID exprs END
+    : THIS id exprs END
     ;
 
 condition
-    : NOT? WORD
+    : NOT? id
     | NOT? EMPTY
     | NOT? NUMBER
     ;
 
-LINE_COMMENT
-    : '//' ~[\n\r]*
+id
+    : ID
     ;
 
+LINE_COMMENT : '//' ~[\n\r]* -> skip;
 UP: 'ВВЕРХ';
 DOWN: 'ВНИЗ';
 LEFT: 'ВЛЕВО';
@@ -78,8 +80,7 @@ THEN: 'ТО';
 ELSE: 'ИНАЧЕ';
 THIS: 'ЭТО';
 END: 'КОНЕЦ';
-ID: LETTER(LETTER|DIGIT)+;
-WORD: LETTER+;
+ID: LETTER (LETTER | DIGIT)*;
 LETTER: [a-zA-Zа-яА-Я];
 NUM: DIGIT+;
 DIGIT: [0-9];

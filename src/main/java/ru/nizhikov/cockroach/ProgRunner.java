@@ -1,6 +1,8 @@
 package ru.nizhikov.cockroach;
 
 import java.util.BitSet;
+import java.util.HashMap;
+import java.util.Map;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -9,7 +11,6 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.nizhikov.cockroach.antlr.CockroachLexer;
@@ -21,6 +22,8 @@ public class ProgRunner {
     private final Field fld;
 
     private final String prog;
+
+    private final Map<String, CockroachParser.ProcContext> procs = new HashMap<>();
 
     private final ANTLRErrorListener errorListener = new ThrowErrorListener();
 
@@ -34,9 +37,10 @@ public class ProgRunner {
         CockroachParser parser = new CockroachParser(new CommonTokenStream(lexer));
 
         parser.addErrorListener(errorListener);
+        invoke(parser.prog().exprs());
+    }
 
-        CockroachParser.ExprsContext exprs = (CockroachParser.ExprsContext)parser.prog().getChild(0);
-
+    private void invoke(CockroachParser.ExprsContext exprs) {
         for (int i = 0; i < exprs.getChildCount(); i++) {
             if (exprs.getChild(i) instanceof CockroachParser.ExprContext ectx) { // Filter out TerminalNodeImpl.
                 LOG.info("InvocationOf[ctx=" + ectx + ']');
@@ -49,12 +53,7 @@ public class ProgRunner {
     private void invoke(CockroachParser.StatementContext sctx) {
         if (sctx.group() != null) {
             CockroachParser.GroupContext gctx = sctx.group();
-
-            int cnt = gctx.getChildCount();
-
-            for (int i = 0; i < cnt; i++)
-                if (gctx.getChild(i) instanceof CockroachParser.ExprContext ectx0)
-                    invoke(ectx0);
+            invoke(gctx.exprs());
         } else {
             switch (sctx.start.getType()) {
                 case CockroachParser.UP -> fld.up();
@@ -93,6 +92,20 @@ public class ProgRunner {
             else
                 invoke(ictx.statement(1));
         }
+        else if (ectx.proc() != null) {
+            procs.put(ectx.proc().id().getText(), ectx.proc());
+        }
+        else if (ectx.id() != null) {
+            String name = ectx.id().getText();
+            CockroachParser.ProcContext pctx = procs.get(name);
+
+            if (pctx == null)
+                throw new RuntimeException("Unknown procedure[name=" + name + ']');
+
+            invoke(pctx.exprs());
+        }
+        else
+            throw new IllegalStateException("Unknown expression[cls=" + ectx.getClass().getSimpleName() + ", ctx="+ ectx + ']');
     }
 
     private boolean eval(CockroachParser.ConditionContext condition) {
@@ -100,8 +113,8 @@ public class ProgRunner {
 
         if (condition.EMPTY() != null)
             res = fld.getLastCharacter() == Field.EMPTY;
-        else if (condition.WORD() != null) {
-            String filter = condition.WORD().getText();
+        else if (condition.id() != null) {
+            String filter = condition.id().getText();
 
             if (filter.length() > 1)
                 throw new RuntimeException("Only one letter condition supported");
