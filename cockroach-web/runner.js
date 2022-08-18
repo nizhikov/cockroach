@@ -5,13 +5,14 @@ import CommonTokenStream from "antlr4/src/antlr4/CommonTokenStream.js"
 import {Field, EMPTY} from './field.js';
 
 export class ProgRunner {
-    constructor(fld, prog) {
+    constructor(fld, prog, debug) {
         this.fld = fld;
         this.prog = prog;
         this.procs = {};
         this.prev = null;
         this.next = null;
         this.delay = 500;
+        this.debug = debug;
     }
 
     run() {
@@ -77,11 +78,6 @@ export class ProgRunner {
         else if (expr.if_() != null) {
             var ictx = expr.if_();
 
-            this.prev = this.next;
-            this.next = ictx;
-
-            this.fld.stay(); // Trigger on change listener.
-
             if (this.eval(ictx.condition()))
                 return this.invokeStatement(ictx.statement(0));
             else
@@ -117,15 +113,15 @@ export class ProgRunner {
                 var tt = statement.start.type;
 
                 if (tt == CockroachParser.UP)
-                    this.fld.up();
+                    return this.fld.up();
                 else if (tt == CockroachParser.DOWN)
-                    this.fld.down();
+                    return this.fld.down();
                 else if (tt == CockroachParser.LEFT)
-                    this.fld.left();
+                    return this.fld.left();
                 else if (tt == CockroachParser.RIGHT)
-                    this.fld.right();
+                    return this.fld.right();
                 else if (tt == CockroachParser.STAY)
-                    this.fld.stay();
+                    return this.fld.stay();
                 else 
                     reject("Unknown function[" +
                         "type=" + tt +
@@ -162,8 +158,7 @@ export class ProgRunner {
         return new Promise((resolve, reject) => { 
             setTimeout(() => {
                 try {
-                    func();
-                    resolve();
+                    resolve(func());
                 }
                 catch (err) {
                     reject(err);

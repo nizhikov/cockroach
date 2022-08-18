@@ -68,14 +68,12 @@
                   <li><a class="dropdown-item" href="#">Здесь будут сохраненный файлы</a></li>
                 </ul>
               </li>
-              <li class="nav-item">
-                <a class="nav-link" aria-current="page" href="#">Поле</a>
-              </li>
             </ul>
             <ul class="navbar-nav ms-auto">
               <li class="nav-item">
-                <button id="reset-field" class="pr-2 btn btn-outline-success pull-right">Сбросить</button>
+                <button id="reset" class="pr-2 btn btn-outline-success pull-right">Сбросить</button>
                 <button id="exec" class="pr-2 btn btn-outline-success pull-right">Выполнить</button>
+                <button id="debug" class="pr-2 btn btn-outline-success pull-right">Выполнить по одной</button>
               </li>
             </ul>
           </div>
@@ -100,9 +98,37 @@
   ВПРАВО
 }
                 </textarea>
+            </div>
+        </div>
+      </div>
+
+      <div class="container-fluid pt-1">
+        <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
+            <div class="">
+                  <div class="row pt-2">
+                    <div class="col">
+                      <div class="form-outline">
+                        <label for="prev-command">Ширина</label>
+                        <input type="number" class="form-control" name="field-width" id="field-width" placeholder="Ширина">
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="form-group">
+                        <label for="next-command">Высота</label>
+                        <input type="number" class="form-control" name="field-height" id="field-height" placeholder="Высота">
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="form-group">
+                        <label for="">&nbsp;</label>
+                        <button id="set-field-size" style="display:block" class="pr-2 btn btn-outline-success pull-right">Изменить</button>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+            <div>
                 <div class="mt-1 alert alert-danger" style="display: none;" role="alert" id="err-msg"> </div>
-                <form class="pt-3">
-                  <div class="row">
+                  <div class="row pt-1">
                     <div class="col">
                       <div class="form-outline">
                         <label for="prev-command">Предыдущая</label>
@@ -121,10 +147,16 @@
                         <input type="text" class="form-control" name="last-char" id="last-char" placeholder="Пусто" readonly>
                       </div>
                     </div>
+                    <div class="col">
+                      <div class="form-group">
+                        <label for="">&nbsp;</label>
+                        <button id="next-step" style="display:block" class="pr-2 btn btn-outline-success pull-right disabled">Следующая</button>
+                      </div>
+                    </div>
                   </div>
-                </form>
             </div>
         </div>
+      </div>
       </div>
   </body>
 </html>

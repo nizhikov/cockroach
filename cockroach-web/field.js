@@ -58,36 +58,40 @@ export class Field {
     }
 
     up() {
-        this.move(-1, 0);
+        return this.move(-1, 0);
     }
 
     down() {
-        this.move(1, 0);
+        return this.move(1, 0);
     }
 
     left() {
-        this.move(0, -1);
+        return this.move(0, -1);
     }
 
     right() {
-        this.move(0, 1);
+        return this.move(0, 1);
     }
 
     stay() {
-        this.move(0, 0);
+        return this.move(0, 0);
     }
 
     move(idelta, jdelta) {
+        var res = Promise.resolve();
+
+        if (this.lsnr)
+            res = this.lsnr();
+
         if (idelta == 0 && jdelta == 0) 
-            return;
+            return res;
 
         this.last = this.move0(COCKROACH, this.pos[0], this.pos[1], idelta, jdelta);
 
         this.pos[0] += idelta;
         this.pos[1] += jdelta;
 
-        if (this.lsnr)
-            this.lsnr();
+        return res;
     }
 
     move0(toUp, i, j, idelta, jdelta) {
@@ -124,5 +128,13 @@ export class Field {
         }
 
         return res;
+    }
+
+    width() {
+        return this.fld[0].length;
+    }
+
+    height() {
+        return this.fld.length;
     }
 }
