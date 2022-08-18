@@ -28,6 +28,18 @@
             background-position: center center;
             background-repeat: no-repeat no-repeat;
         }
+
+        .field > .field-row > .field-letter.field-col.red {
+          color: red;
+        }
+
+        .field > .field-row > .field-cockroach.field-col.red, .field > .field-row > .field-empty.field-col.red {
+          background-color: red;
+        }
+
+        .field > .field-row > .field-col:hover {
+          background-color: #dee2e6;
+        }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
@@ -62,6 +74,7 @@
             </ul>
             <ul class="navbar-nav ms-auto">
               <li class="nav-item">
+                <button id="reset-field" class="pr-2 btn btn-outline-success pull-right">Сбросить</button>
                 <button id="exec" class="pr-2 btn btn-outline-success pull-right">Выполнить</button>
               </li>
             </ul>
@@ -74,34 +87,6 @@
 
             </div>
             <div class="bg-light border rounded-3">
-<!--
-                <textarea class="form-control h-100" id="prog-text">
-// 1. Букву К на место буквы Т
-//    1.1. Букву К во вторую строку
-ВВЕРХ
-//    1.2. Букву К в клетку (2,4)
-ВЛЕВО
-ВВЕРХ
-ВПРАВО
-ВПРАВО
-//    1.3. Букву К на место,
-//         а букву Т в 4-ю строку
-ВВЕРХ
-ВПРАВО
-ВНИЗ
-// 2. Букву Т на место буквы К
-//    2.1. Букву Т в клетку (4,2)
-ВПРАВО
-ВНИЗ
-ВНИЗ
-ВЛЕВО
-ВЛЕВО
-//    2.2. Букву Т на место
-ВНИЗ
-ВЛЕВО
-ВВЕРХ
-                </textarea>
--->
                 <textarea class="form-control h-100" id="prog-text">
 ПОВТОРИ 4 {
   ВВЕРХ
@@ -115,6 +100,29 @@
   ВПРАВО
 }
                 </textarea>
+                <div class="mt-1 alert alert-danger" style="display: none;" role="alert" id="err-msg"> </div>
+                <form class="pt-3">
+                  <div class="row">
+                    <div class="col">
+                      <div class="form-outline">
+                        <label for="prev-command">Предыдущая</label>
+                        <input type="text" class="form-control" name="prev-command" id="prev-command" placeholder="Пусто" readonly>
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="form-group">
+                        <label for="next-command">Следующая</label>
+                        <input type="text" class="form-control" name="next-command" id="next-command" placeholder="Пусто" readonly>
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="form-group">
+                        <label for="last-char">Толкнул</label>
+                        <input type="text" class="form-control" name="last-char" id="last-char" placeholder="Пусто" readonly>
+                      </div>
+                    </div>
+                  </div>
+                </form>
             </div>
         </div>
       </div>

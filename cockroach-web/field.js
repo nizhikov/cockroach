@@ -1,6 +1,6 @@
 export const COCKROACH = '~';
 export const EMPTY = '_';
-var CAN_T_MOVE_WALL = 'Can\'t move wall';
+var CAN_T_MOVE_WALL = 'Не могу!';
 
 export class Field {
     constructor(fieldStr) {
@@ -13,7 +13,7 @@ export class Field {
             if (lineWidth != this.fld[i].length)
                 throw 'Lines has different length';
             
-            if (!/^[A-Za-zА-Яа-я0-9_~]+$/.test(this.fld[i]))
+            if (!this.testline(this.fld[i]))
                 throw 'Line has wrong format['+ this.fld[i] + ']';
 
             this.fld[i] = this.fld[i].split('');
@@ -27,6 +27,34 @@ export class Field {
 
             this.pos = [i, idx];
         }
+    }
+
+    set(char, i, j) {
+        if (this.pos[0] == i && this.pos[1] == j)
+            return;
+        
+        this.fld[i][j] = char.charAt(0);
+
+        if (this.lsnr)
+            this.lsnr();
+    }
+
+    testline(line) {
+        return /^[A-Za-zА-Яа-я0-9_~]+$/.test(line);
+    }
+
+    change(from_i, from_j, to_i, to_j) {
+        if (this.pos[0] == to_i && this.pos[1] == to_j)
+            return;
+
+        if (this.pos[0] == from_i && this.pos[1] == from_j)
+            this.pos = [to_i, to_j];
+
+        this.fld[to_i][to_j] = this.fld[from_i][from_j];
+        this.fld[from_i][from_j] = EMPTY;
+
+        if (this.lsnr)
+            this.lsnr();
     }
 
     up() {

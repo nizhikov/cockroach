@@ -11,7 +11,7 @@ export class ProgRunner {
         this.procs = {};
         this.prev = null;
         this.next = null;
-        this.delay = 2000;
+        this.delay = 500;
     }
 
     run() {
@@ -161,9 +161,13 @@ export class ProgRunner {
 
         return new Promise((resolve, reject) => { 
             setTimeout(() => {
-                func();
-
-                resolve()
+                try {
+                    func();
+                    resolve();
+                }
+                catch (err) {
+                    reject(err);
+                }
             }, delay);
         });
     }
