@@ -1,0 +1,11 @@
+{
+  "type" : "module",
+  "dependencies": {
+    "antlr4": "^4.10.1",
+    "mocha": "^10.0.0",
+    "test": "^3.2.1"
+  },
+  "scripts": {
+    "test": "mocha ./*.test.js"
+  }
+}

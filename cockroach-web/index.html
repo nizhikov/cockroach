@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <!-- Обязательные метатеги -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+
+    <style>
+        .field > .field-row > .field-col {
+            display: inline-block;
+            box-shadow: 
+                2px 0 0 0 #dee2e6, 
+                0 2px 0 0 #dee2e6, 
+                2px 2px 0 0 #dee2e6,
+                2px 0 0 0 #dee2e6 inset, 
+                0 2px 0 0 #dee2e6 inset;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 2rem;
+        }
+        
+        .field > .field-row > .field-cockroach.field-col {
+            background-image: url("cockroach.png");
+            background-size: 75% 75%;
+            background-position: center center;
+            background-repeat: no-repeat no-repeat;
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0"></script>
+    <script src="field.js"></script>
+    <script src="index.js"></script>
+
+    <title>Hello, world!</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light"  style="background-color: #e3f2fd;">
+        <div class="container-fluid">
+          <span class="navbar-brand" href="#">Кукарача</span>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Файл
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <li><a class="dropdown-item" href="#">Сохранить</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="#">Здесь будут сохраненный файлы</a></li>
+                </ul>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="#">Поле</a>
+              </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                <button id="exec" class="pr-2 btn btn-outline-success pull-right">Выполнить</button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      <div class="container-fluid pt-3">
+        <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
+            <div id="field" class="bg-light border rounded-3 field">
+
+            </div>
+            <div class="bg-light border rounded-3">
+<!--
+                <textarea class="form-control h-100" id="prog-text">
+// 1. Букву К на место буквы Т
+//    1.1. Букву К во вторую строку
+ВВЕРХ
+//    1.2. Букву К в клетку (2,4)
+ВЛЕВО
+ВВЕРХ
+ВПРАВО
+ВПРАВО
+//    1.3. Букву К на место,
+//         а букву Т в 4-ю строку
+ВВЕРХ
+ВПРАВО
+ВНИЗ
+// 2. Букву Т на место буквы К
+//    2.1. Букву Т в клетку (4,2)
+ВПРАВО
+ВНИЗ
+ВНИЗ
+ВЛЕВО
+ВЛЕВО
+//    2.2. Букву Т на место
+ВНИЗ
+ВЛЕВО
+ВВЕРХ
+                </textarea>
+-->
+                <textarea class="form-control h-100" id="prog-text">
+ПОВТОРИ 4 {
+  ВВЕРХ
+  ЕСЛИ ЦИФРА ТО
+      ВНИЗ
+  ИНАЧЕ {
+      ВВЕРХ
+      ВНИЗ
+      ВНИЗ
+  }
+  ВПРАВО
+}
+                </textarea>
+            </div>
+        </div>
+      </div>
+  </body>
+</html>

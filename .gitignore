@@ -41,3 +41,7 @@ bin/
 ### Mac OS ###
 .DS_Store
 .idea
+
+cockroach-web/dist
+cockroach-web/.cache
+cockroach-web/node_modules
