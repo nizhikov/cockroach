@@ -21,6 +21,10 @@
             vertical-align: middle;
             font-size: 2rem;
         }
+
+        .field > .field-row {
+            line-height: 0;
+        }
         
         .field > .field-row > .field-cockroach.field-col {
             background-image: url("cockroach.png");
@@ -40,16 +44,25 @@
         .field > .field-row > .field-col:hover {
           background-color: #dee2e6;
         }
+
+        .field-parent {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0"></script>
     <script src="field.js"></script>
     <script src="index.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.css"></link>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.js"></script>
 
     <title>Hello, world!</title>
   </head>
   <body>
+    <header>
     <nav class="navbar navbar-expand-lg navbar-light"  style="background-color: #e3f2fd;">
         <div class="container-fluid">
           <span class="navbar-brand" href="#">Кукарача</span>
@@ -79,84 +92,69 @@
           </div>
         </div>
       </nav>
-      <div class="container-fluid pt-3">
-        <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
-            <div id="field" class="bg-light border rounded-3 field">
-
-            </div>
-            <div class="bg-light border rounded-3">
-                <textarea class="form-control h-100" id="prog-text">
-ПОВТОРИ 4 {
-  ВВЕРХ
-  ЕСЛИ ЦИФРА ТО
-      ВНИЗ
-  ИНАЧЕ {
-      ВВЕРХ
-      ВНИЗ
-      ВНИЗ
-  }
-  ВПРАВО
-}
-                </textarea>
-            </div>
+      </header>
+      <main style="height: calc(100vh - 56px)">
+        <div class="container-fluid pt-3" style="height: calc(100% - 85px)">
+          <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr; height: 100%;">
+              <div class="field-parent">
+                <div id="field" class="bg-light border rounded-3 field"></div>
+              </div>
+              <div class="bg-light border rounded-3" id="prog-root"> </div>
+          </div>
         </div>
-      </div>
-
-      <div class="container-fluid pt-1">
-        <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
-            <div class="">
-                  <div class="row pt-2">
-                    <div class="col">
-                      <div class="form-outline">
-                        <label for="prev-command">Ширина</label>
-                        <input type="number" class="form-control" name="field-width" id="field-width" placeholder="Ширина">
-                      </div>
-                    </div>
-                    <div class="col">
-                      <div class="form-group">
-                        <label for="next-command">Высота</label>
-                        <input type="number" class="form-control" name="field-height" id="field-height" placeholder="Высота">
-                      </div>
-                    </div>
-                    <div class="col">
-                      <div class="form-group">
-                        <label for="">&nbsp;</label>
-                        <button id="set-field-size" style="display:block" class="pr-2 btn btn-outline-success pull-right">Изменить</button>
-                      </div>
-                    </div>
-                  </div>
+        <div class="container-fluid pt-1">
+          <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
+            <div class="row pt-2">
+              <div class="col">
+                <div class="form-outline">
+                  <label for="prev-command">Ширина</label>
+                  <input type="number" class="form-control" name="field-width" id="field-width" placeholder="Ширина">
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-group">
+                  <label for="next-command">Высота</label>
+                  <input type="number" class="form-control" name="field-height" id="field-height" placeholder="Высота">
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-group">
+                  <label for="">&nbsp;</label>
+                  <button id="set-field-size" style="display:block" class="pr-2 btn btn-outline-success pull-right">Изменить</button>
+                </div>
+              </div>
             </div>
             <div>
-                <div class="mt-1 alert alert-danger" style="display: none;" role="alert" id="err-msg"> </div>
-                  <div class="row pt-1">
-                    <div class="col">
-                      <div class="form-outline">
-                        <label for="prev-command">Предыдущая</label>
-                        <input type="text" class="form-control" name="prev-command" id="prev-command" placeholder="Пусто" readonly>
-                      </div>
-                    </div>
-                    <div class="col">
-                      <div class="form-group">
-                        <label for="next-command">Следующая</label>
-                        <input type="text" class="form-control" name="next-command" id="next-command" placeholder="Пусто" readonly>
-                      </div>
-                    </div>
-                    <div class="col">
-                      <div class="form-group">
-                        <label for="last-char">Толкнул</label>
-                        <input type="text" class="form-control" name="last-char" id="last-char" placeholder="Пусто" readonly>
-                      </div>
-                    </div>
-                    <div class="col">
-                      <div class="form-group">
-                        <label for="">&nbsp;</label>
-                        <button id="next-step" style="display:block" class="pr-2 btn btn-outline-success pull-right disabled">Следующая</button>
-                      </div>
-                    </div>
+              <div class="mt-1 alert alert-danger" style="display: none;" role="alert" id="err-msg"> </div>
+              <div class="row pt-1">
+                <div class="col">
+                  <div class="form-outline">
+                    <label for="prev-command">Предыдущая</label>
+                    <input type="text" class="form-control" name="prev-command" id="prev-command" placeholder="Пусто" readonly>
                   </div>
+                </div>
+                <div class="col">
+                  <div class="form-group">
+                    <label for="next-command">Следующая</label>
+                    <input type="text" class="form-control" name="next-command" id="next-command" placeholder="Пусто" readonly>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-group">
+                    <label for="last-char">Толкнул</label>
+                    <input type="text" class="form-control" name="last-char" id="last-char" placeholder="Пусто" readonly>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-group">
+                    <label for="">&nbsp;</label>
+                    <button id="next-step" style="display:block" class="pr-2 btn btn-outline-success pull-right disabled">Следующая</button>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
-      </div>
-      </div>
+      </main>
   </body>
 </html>

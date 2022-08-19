@@ -12,10 +12,20 @@ var is_debug = false;
 var debug_promise_resolve;
 var f = new Field(field);
 var runner;
+var editor;
 
 var draw = function() {
     var root = $("#field");
-    var colsz = Math.round(root.width() / f.fld[0].length);
+    var colsz = Math.round($('.field-parent').width() / f.fld[0].length);
+    
+    console.log('parent.width = ' + $('.field-parent').width());
+    console.log('parent.height = ' + $('.field-parent').height());
+    console.log('colsz0 = ' + colsz);
+
+    if (colsz * f.fld.length > $('.field-parent').height()) {
+        colsz = Math.round($('.field-parent').height() / f.fld.length);
+        console.log('colsz1 = ' + colsz);
+    }
 
     root.width(colsz * f.fld[0].length).height(colsz * f.fld.length);
 
@@ -99,7 +109,7 @@ $(document).ready(function () {
         if (is_debug)
             $('#next-step').removeClass('disabled');
 
-        runner = new ProgRunner(f, $("#prog-text").val(), is_debug);
+        runner = new ProgRunner(f, editor.getValue(), is_debug);
 
         runner.run().then(() => {
             setTimeout(draw, runner.delay);
@@ -148,6 +158,23 @@ $(document).ready(function () {
         initField();
     });
 
+    editor = CodeMirror(document.querySelector('#prog-root'), {
+        lineNumbers: true,
+        tabSize: 2,
+        value:  'ПОВТОРИ 4 {\n' + 
+                '  ВВЕРХ\n' +
+                '  ЕСЛИ ЦИФРА ТО\n' +
+                '      ВНИЗ\n' +
+                '  ИНАЧЕ {\n' +
+                '      ВВЕРХ\n' +
+                '      ВНИЗ\n' +
+                '      ВНИЗ\n' +
+                '  }\n' +
+                '  ВПРАВО\n' +
+                '}'
+    });
+
+    editor.setSize("100%", "100%");
 });
 
 $(document).on('click', function (e) {
