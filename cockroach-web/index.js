@@ -69,6 +69,14 @@ var draw = function() {
     $('#next-command').val(next);
     $('#last-char').val(f.last);
 
+    if (runner && runner.next) {
+        editor.setSelection(
+            { line: runner.next.start.line - 1, ch: runner.next.start.column + runner.next.getText().length },
+            { line: runner.next.start.line - 1, ch: runner.next.start.column},
+            { scroll: true, }
+        );
+    }
+
     if (is_debug) {
         return new Promise(function (resolve, reject) {
             debug_promise_resolve = resolve;
