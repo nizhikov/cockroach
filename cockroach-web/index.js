@@ -14,18 +14,21 @@ var f = new Field(field);
 var runner;
 var editor;
 
+var files = function() {
+    var files = localStorage.getItem('files');
+
+    if (files == null)
+        return {};
+
+    return JSON.parse(files);
+};
+
 var draw = function() {
     var root = $("#field");
     var colsz = Math.round($('.field-parent').width() / f.fld[0].length);
-    
-    console.log('parent.width = ' + $('.field-parent').width());
-    console.log('parent.height = ' + $('.field-parent').height());
-    console.log('colsz0 = ' + colsz);
 
-    if (colsz * f.fld.length > $('.field-parent').height()) {
+    if (colsz * f.fld.length > $('.field-parent').height()) 
         colsz = Math.round($('.field-parent').height() / f.fld.length);
-        console.log('colsz1 = ' + colsz);
-    }
 
     root.width(colsz * f.fld[0].length).height(colsz * f.fld.length);
 
@@ -88,6 +91,16 @@ var initField = () => {
 
     $('#field-width').val(f.width());
     $('#field-height').val(f.height());
+};
+
+var drawSaved = () => {
+    var files0 = files();
+
+    $('.load-saved').remove();
+
+    for (var saved in files0) {
+        $('#save-menu').append('<li><a class="dropdown-item load-saved" href="#">' + saved + '</a></li>');
+    }
 };
 
 $(document).ready(function () {
@@ -175,6 +188,25 @@ $(document).ready(function () {
     });
 
     editor.setSize("100%", "100%");
+
+    drawSaved();
+
+    $('#save-form').submit(() => {
+        $('#save-dialog').modal('hide');
+
+        var files0 = files();
+
+        files0[$('#app-name').val()] = {
+            field: f.toString(),
+            prog: editor.getValue()
+        };
+
+        localStorage.setItem('files', JSON.stringify(files0));
+
+        drawSaved();
+
+        return false;
+    });
 });
 
 $(document).on('click', function (e) {
@@ -198,6 +230,15 @@ $(document).on('click', '.field-col', function () {
 
         $('.field-col').removeClass('red');
     }
+});
+
+$(document).on('click', '.load-saved', function (e) {
+    var saved = files()[$(e.target).text()];
+
+    field = saved.field;
+    editor.setValue(saved.prog);
+
+    initField();
 });
 
 $(document).keypress(function (e) {
