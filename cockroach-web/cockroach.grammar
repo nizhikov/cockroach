@@ -1,0 +1,86 @@
+@top prog { expr+ }
+
+@skip { SPACE | LINE_COMMENT }
+
+expr {
+    statement |
+    repeat |
+    while |
+    if |
+    proc |
+    ID 
+}
+
+statement {
+    UP | 
+    DOWN |
+    LEFT |
+    RIGHT |
+    STAY |
+    group
+}
+
+repeat {
+    REPEAT NUM expr
+}
+
+while {
+    WHILE condition expr
+}
+
+group {
+    OPEN_BRACKET expr+ CLOSE_BRACKET
+}
+
+if {
+    IF condition THEN statement (ELSE statement)?
+}
+
+proc {
+    THIS ID expr+ END
+}
+
+condition {
+    NOT? ID |
+    NOT? EMPTY |
+    NOT? NUMBER
+}
+
+@tokens {
+    @precedence { UP, ID }
+    @precedence { DOWN, ID }
+    @precedence { LEFT, ID }
+    @precedence { RIGHT, ID }
+    @precedence { STAY, ID }
+    @precedence { REPEAT, ID }
+    @precedence { WHILE, ID }
+    @precedence { IF, ID }
+    @precedence { THIS, ID }
+    @precedence { NOT, ID }
+    @precedence { EMPTY, ID }
+    @precedence { NUMBER, ID }
+    @precedence { END, ID }
+    @precedence { ELSE, ID }
+
+    LINE_COMMENT { "//" ![\r\n]* }
+    SPACE { $[ \t\n\r]+ }
+    UP { 'ВВЕРХ' }
+    DOWN { 'ВНИЗ' }
+    LEFT { 'ВЛЕВО' }
+    RIGHT { 'ВПРАВО' }
+    STAY { 'СТОЯТЬ' }
+    NOT { 'НЕ' }
+    EMPTY { 'ПУСТО' }
+    NUMBER { 'ЦИФРА' }
+    REPEAT { 'ПОВТОРИ' }
+    WHILE { 'ПОКА' }
+    OPEN_BRACKET { '{' }
+    CLOSE_BRACKET { '}' }
+    IF { 'ЕСЛИ' }
+    THEN { 'ТО' }
+    ELSE { 'ИНАЧЕ' }
+    THIS { 'ЭТО' }
+    END { 'КОНЕЦ' }
+    ID { $[а-яА-Яa-zA-Z_0-9]+ }
+    NUM { $[0-9]+ }
+}

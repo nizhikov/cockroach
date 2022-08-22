@@ -1,7 +1,15 @@
 {
-  "type" : "module",
+  "type": "module",
   "dependencies": {
+    "@codemirror/autocomplete": "^6.1.0",
+    "@codemirror/language": "^6.2.1",
+    "@codemirror/state": "^6.1.1",
+    "@codemirror/view": "^6.2.0",
+    "@lezer/common": "^1.0.0",
+    "@lezer/generator": "^1.1.1",
     "antlr4": "^4.10.1",
+    "codemirror": "^6.0.1",
+    "lezer": "^0.13.5",
     "mocha": "^10.0.0",
     "test": "^3.2.1"
   },
