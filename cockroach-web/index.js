@@ -1,5 +1,10 @@
 import {Field, EMPTY, COCKROACH} from './field';
-import { ProgRunner } from './runner';
+import {ProgRunner} from './runner';
+import {parser} from './cockroach-lezer';
+import {foldInside, foldNodeProp, indentNodeProp, LanguageSupport, LRLanguage} from '@codemirror/language';
+import {completeFromList} from '@codemirror/autocomplete';
+import {styleTags, tags} from '@lezer/highlight';
+import {basicSetup, EditorView} from 'codemirror';
 
 var field = 
     "_____\n" +
@@ -70,11 +75,9 @@ var draw = function() {
     $('#last-char').val(f.last);
 
     if (runner && runner.next) {
-        editor.setSelection(
-            { line: runner.next.start.line - 1, ch: runner.next.start.column + runner.next.getText().length },
-            { line: runner.next.start.line - 1, ch: runner.next.start.column},
-            { scroll: true, }
-        );
+        editor.dispatch({
+            selection: { anchor : runner.next.start.start, head: runner.next.start.stop + 1}
+        });
     }
 
     if (is_debug) {
@@ -100,6 +103,78 @@ var initField = () => {
     $('#field-width').val(f.width());
     $('#field-height').val(f.height());
 };
+
+var initEditor = () => {
+    var parser0 = parser.configure({
+        props: [
+            styleTags({
+                LINE_COMMENT: tags.lineComment,
+                UP: tags.keyword,
+                DOWN: tags.keyword,
+                LEFT: tags.keyword,
+                RIGHT: tags.keyword,
+                STAY: tags.keyword,
+                NOT: tags.keyword,
+                EMPTY: tags.keyword,
+                NUMBER: tags.keyword,
+                REPEAT: tags.keyword,
+                WHILE: tags.keyword,
+                OPEN_BRACKET: tags.paren,
+                CLOSE_BRACKET: tags.paren,
+                IF: tags.keyword,
+                THEN: tags.keyword,
+                ELSE: tags.keyword,
+                THIS: tags.keyword,
+                END: tags.keyword
+            }),
+            indentNodeProp.add({
+                Application: context => context.column(context.node.from) + context.unit
+            }),
+            foldNodeProp.add({
+                Application: foldInside
+            })
+        ]
+    });
+
+    var lang = LRLanguage.define({
+        parser: parser0,
+        languageData : {
+            commenTokens: {
+                line: "//"
+            }
+        }
+    });
+
+    var autoComplete = lang.data.of({
+        autocomplete: completeFromList([
+            { label: 'ВВЕРХ', type: 'keyword'},
+            { label: 'ВНИЗ', type: 'keyword'},
+            { label: 'ВЛЕВО', type: 'keyword'},
+            { label: 'ВПРАВО', type: 'keyword'},
+            { label: 'СТОЯТЬ', type: 'keyword'}
+        ])
+    });
+
+    var cockroachLang = function() { 
+        return new LanguageSupport(lang, [autoComplete]); 
+    } 
+
+    editor = new EditorView({
+        parent: document.querySelector('#prog-root'),
+        extensions: [basicSetup, cockroachLang()],
+        doc:  'ПОВТОРИ 4 {\n' + 
+                '  ВВЕРХ\n' +
+                '  ЕСЛИ ЦИФРА ТО\n' +
+                '      ВНИЗ\n' +
+                '  ИНАЧЕ {\n' +
+                '      ВВЕРХ\n' +
+                '      ВНИЗ\n' +
+                '      ВНИЗ\n' +
+                '  }\n' +
+                '  ВПРАВО\n' +
+                '}'
+    });
+}
 
 var drawSaved = () => {
     var files0 = files();
@@ -130,7 +205,7 @@ $(document).ready(function () {
         if (is_debug)
             $('#next-step').removeClass('disabled');
 
-        runner = new ProgRunner(f, editor.getValue(), is_debug);
+        runner = new ProgRunner(f, editor.state.doc.toString(), is_debug);
 
         runner.run().then(() => {
             setTimeout(draw, runner.delay);
@@ -139,7 +214,7 @@ $(document).ready(function () {
             is_debug = false;
             $('#next-step').addClass('disabled');
 
-            $('#exec').removeClass('disabled');
+            $('#exec').removeClass('disabled')
             $('#reset').removeClass('disabled');
             $('#debug').removeClass('disabled');
         }, (err) => {
@@ -179,23 +254,7 @@ $(document).ready(function () {
         initField();
     });
 
-    editor = CodeMirror(document.querySelector('#prog-root'), {
-        lineNumbers: true,
-        tabSize: 2,
-        value:  'ПОВТОРИ 4 {\n' + 
-                '  ВВЕРХ\n' +
-                '  ЕСЛИ ЦИФРА ТО\n' +
-                '      ВНИЗ\n' +
-                '  ИНАЧЕ {\n' +
-                '      ВВЕРХ\n' +
-                '      ВНИЗ\n' +
-                '      ВНИЗ\n' +
-                '  }\n' +
-                '  ВПРАВО\n' +
-                '}'
-    });
-
-    editor.setSize("100%", "100%");
+    initEditor();
 
     drawSaved();
 
@@ -206,7 +265,7 @@ $(document).ready(function () {
 
         files0[$('#app-name').val()] = {
             field: f.toString(),
-            prog: editor.getValue()
+            prog: editor.state.doc.toString()
         };
 
         localStorage.setItem('files', JSON.stringify(files0));
@@ -244,7 +303,9 @@ $(document).on('click', '.load-saved', function (e) {
     var saved = files()[$(e.target).text()];
 
     field = saved.field;
-    editor.setValue(saved.prog);
+    editor.dispatch({
+        changes: {from: 0, to: editor.state.doc.toString().length, insert: saved.prog}
+    });
 
     initField();
 });
@@ -264,3 +325,8 @@ $(document).keypress(function (e) {
         parseInt($('.field-col.red').attr('j')),
     );
 });
+
+/**
+ * TODO:
+ * * сообщение и подсветка при ошибке компиляции
+ */
