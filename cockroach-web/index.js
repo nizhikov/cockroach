@@ -4,7 +4,7 @@ import {parser} from './cockroach-lezer';
 import {foldInside, foldNodeProp, indentNodeProp, LanguageSupport, LRLanguage} from '@codemirror/language';
 import {completeFromList} from '@codemirror/autocomplete';
 import {styleTags, tags} from '@lezer/highlight';
-import {basicSetup, EditorView} from 'codemirror';
+import {basicSetup, EditorView, highlightActiveLineGutter} from 'codemirror';
 
 var field = 
     "_____\n" +
@@ -151,7 +151,17 @@ var initEditor = () => {
             { label: 'ВНИЗ', type: 'keyword'},
             { label: 'ВЛЕВО', type: 'keyword'},
             { label: 'ВПРАВО', type: 'keyword'},
-            { label: 'СТОЯТЬ', type: 'keyword'}
+            { label: 'СТОЯТЬ', type: 'keyword'},
+            { label: 'ЕСЛИ', type: 'keyword'},
+            { label: 'ТО', type: 'keyword'},
+            { label: 'ИНАЧЕ', type: 'keyword'},
+            { label: 'НЕ', type: 'keyword'},
+            { label: 'ПУСТО', type: 'keyword'},
+            { label: 'ЦИФРА', type: 'keyword'},
+            { label: 'ПОВТОРИ', type: 'keyword'},
+            { label: 'ПОКА', type: 'keyword'},
+            { label: 'ЭТО', type: 'keyword'},
+            { label: 'КОНЕЦ', type: 'keyword'}
         ])
     });
 
@@ -160,6 +170,7 @@ var initEditor = () => {
     } 
 
     editor = new EditorView({
+        lint: true,
         parent: document.querySelector('#prog-root'),
         extensions: [basicSetup, cockroachLang()],
         doc:  'ПОВТОРИ 4 {\n' + 
@@ -201,6 +212,7 @@ $(document).ready(function () {
         $('#exec').addClass('disabled');
         $('#reset').addClass('disabled');
         $('#debug').addClass('disabled');
+        $('#err-msg').hide();
 
         if (is_debug)
             $('#next-step').removeClass('disabled');
@@ -218,7 +230,10 @@ $(document).ready(function () {
             $('#reset').removeClass('disabled');
             $('#debug').removeClass('disabled');
         }, (err) => {
-            $('#err-msg').html(err);
+            is_run_active = false;
+            is_debug = false;
+
+            $('#err-msg').html(err.msg.replaceAll('\n', '<br>'));
             $('#err-msg').show();
 
             $('#next-step').addClass('disabled');
@@ -226,6 +241,12 @@ $(document).ready(function () {
             $('#exec').removeClass('disabled');
             $('#reset').removeClass('disabled');
             $('#debug').removeClass('disabled');
+
+            if (err.token) {
+                editor.dispatch({
+                    selection: { anchor : err.token.start.start, head: err.token.start.stop + 1}
+                });
+            }
         });
     });
 

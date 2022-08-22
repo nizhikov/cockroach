@@ -67,7 +67,12 @@ export class ProgRunner {
             var runner = this;
 
             var continuation = () => {
-                if (runner.eval(wctx.condition()))
+                var res = runner.eval(wctx.condition());
+                var res_is_promise = res.then && typeof res.then === 'function';
+
+                if (res_is_promise)
+                    return res;
+                else if (res)
                     return runner.invokeExpr(wctx.expr()).then(continuation);
                 
                 return runner.withDelay(() => {}, 0); 
@@ -77,8 +82,12 @@ export class ProgRunner {
         }
         else if (expr.if_() != null) {
             var ictx = expr.if_();
+            var res = this.eval(ictx.condition());
+            var res_is_promise = res.then && typeof res.then === 'function';
 
-            if (this.eval(ictx.condition()))
+            if (res_is_promise)
+                return res;
+            else if (res)
                 return this.invokeStatement(ictx.statement(0));
             else
                 return this.invokeStatement(ictx.statement(1));
@@ -94,12 +103,12 @@ export class ProgRunner {
             var pctx = this.procs[name];
 
             if (pctx == null)
-                throw 'Unknown procedure[name=' + name + ']';
+                return Promise.reject({msg: 'Unknown procedure[name=' + name + ']', token : expr});
 
             return this.invokeExprs(pctx.exprs());
         }
         else
-            throw "Unknown expression[expr="+ expr.getText() + ']';
+            return Promise.reject({msg: "Unknown expression[expr="+ expr.getText() + ']', token: expr});
     }
 
     invokeStatement(statement) {
@@ -123,9 +132,9 @@ export class ProgRunner {
                 else if (tt == CockroachParser.STAY)
                     return this.fld.stay();
                 else 
-                    reject("Unknown function[" +
+                    return Promise.reject({ msg: "Unknown function[" +
                         "type=" + tt +
-                        ", text=" + statement.start.getText() + ']');
+                        ", text=" + statement.getText() + ']', token : statement });
             });
         }
     }
@@ -161,7 +170,7 @@ export class ProgRunner {
                     resolve(func());
                 }
                 catch (err) {
-                    reject(err);
+                    reject({msg: err});
                 }
             }, delay);
         });

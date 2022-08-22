@@ -95,11 +95,15 @@ export class Field {
     }
 
     move0(toUp, i, j, idelta, jdelta) {
-        if (i + idelta < 0 || i + idelta >= this.fld.length)
-            throw CAN_T_MOVE_WALL + this.toString();
+        if (i + idelta < 0 || i + idelta >= this.fld.length) {
+            console.log(this.toString());
+            throw CAN_T_MOVE_WALL;
+        }
 
-        if (j + jdelta < 0 || j + jdelta >= this.fld[0].length) 
-            throw CAN_T_MOVE_WALL + this.toString();
+        if (j + jdelta < 0 || j + jdelta >= this.fld[0].length)  {
+            console.log(this.toString());
+            throw CAN_T_MOVE_WALL;
+        }
 
         var possiblyEmpty = this.fld[i + idelta][j + jdelta];
 
