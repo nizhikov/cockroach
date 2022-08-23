@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <!-- Обязательные метатеги -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+
+    <style>.field > .field-row > .field-col {
+            display: inline-block;
+            box-shadow: 
+                2px 0 0 0 #dee2e6, 
+                0 2px 0 0 #dee2e6, 
+                2px 2px 0 0 #dee2e6,
+                2px 0 0 0 #dee2e6 inset, 
+                0 2px 0 0 #dee2e6 inset;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 2rem;
+        }
+
+        .field > .field-row {
+            line-height: 0;
+        }
+        
+        .field > .field-row > .field-cockroach.field-col {
+            background-image: url("cockroach.e12d6d36.png");
+            background-size: 75% 75%;
+            background-position: center center;
+            background-repeat: no-repeat no-repeat;
+        }
+
+        .field > .field-row > .field-letter.field-col.red {
+          color: red;
+        }
+
+        .field > .field-row > .field-cockroach.field-col.red, .field > .field-row > .field-empty.field-col.red {
+          background-color: red;
+        }
+
+        .field > .field-row > .field-col:hover {
+          background-color: #dee2e6;
+        }
+
+        .field-parent {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        #prog-root > .cm-editor {
+          height: 100%;
+        }
+
+        .cm-selectionMatch {
+          background-color: inherit !important;
+        }</style>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.css">
+
+    <title>Кукарача</title>
+  </head>
+  <body>
+    <header>
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
+        <div class="container-fluid">
+          <span class="navbar-brand" href="#">Кукарача</span>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Файл</a>
+                <ul class="dropdown-menu" id="save-menu" aria-labelledby="navbarDropdown">
+                  <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#save-dialog">Сохранить</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                </ul>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link" href="#" role="button" aria-expanded="false">Справка</a>
+              </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                <button id="reset" class="pr-2 btn btn-primary pull-right">Сбросить</button>
+                <button id="exec" class="pr-2 btn btn-primary pull-right">Выполнить</button>
+                <button id="debug" class="pr-2 btn btn-primary pull-right">Выполнить по одной</button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      </header>
+      <main style="height: calc(100vh - 56px)">
+        <div class="container-fluid pt-3" style="height: calc(100% - 85px)">
+          <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr; height: 100%;">
+              <div class="field-parent">
+                <div id="field" class="bg-light border rounded-3 field"></div>
+              </div>
+              <div class="bg-light border rounded-3" id="prog-root"> </div>
+          </div>
+        </div>
+        <div class="container-fluid pt-1">
+          <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
+            <div class="row pt-2">
+              <div class="col">
+                <div class="form-outline">
+                  <label for="prev-command">Ширина</label>
+                  <input type="number" class="form-control" name="field-width" id="field-width" placeholder="Ширина">
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-group">
+                  <label for="next-command">Высота</label>
+                  <input type="number" class="form-control" name="field-height" id="field-height" placeholder="Высота">
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-group">
+                  <label for="">&nbsp;</label>
+                  <button id="set-field-size" style="display:block" class="pr-2 btn btn-outline-success pull-right">Изменить</button>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="mt-1 alert alert-danger" style="display: none;" role="alert" id="err-msg"> </div>
+              <div class="row pt-1">
+                <div class="col">
+                  <div class="form-outline">
+                    <label for="prev-command">Предыдущая</label>
+                    <input type="text" class="form-control" name="prev-command" id="prev-command" placeholder="Пусто" readonly="">
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-group">
+                    <label for="next-command">Следующая</label>
+                    <input type="text" class="form-control" name="next-command" id="next-command" placeholder="Пусто" readonly="">
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-group">
+                    <label for="last-char">Толкнул</label>
+                    <input type="text" class="form-control" name="last-char" id="last-char" placeholder="Пусто" readonly="">
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-group">
+                    <label for="">&nbsp;</label>
+                    <button id="next-step" style="display:block" class="pr-2 btn btn-outline-success pull-right disabled">Следующая</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+    <div class="modal fade" id="save-dialog" tabindex="-1" aria-labelledby="save-dialog-label" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form id="save-form" class="need-validation">
+            <div class="modal-header">
+              <h5 class="modal-title" id="save-dialog-label">Имя:</h5>
+            </div>
+            <div class="modal-body input-group has-validation">
+              <input type="text" class="form-control" name="app-name" id="app-name" placeholder="Название" required="">
+              <div class="invalid-feedback">Введите название</div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">Сохранить</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+    <script src="field.6bf66d2b.js"></script>
+    <script src="cockroach-web.7003f9fd.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.js"></script>
+  </body>
+
+</html>
