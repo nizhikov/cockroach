@@ -279,6 +279,10 @@ $(document).ready(function () {
 
     drawSaved();
 
+    $('#help-close').click(() => {
+        $('#help-dialog').modal('hide');
+    });
+
     $('#save-form').submit(() => {
         $('#save-dialog').modal('hide');
 
