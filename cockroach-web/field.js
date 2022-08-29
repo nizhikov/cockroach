@@ -94,24 +94,36 @@ export class Field {
         return res;
     }
 
-    move0(toUp, i, j, idelta, jdelta) {
+    move0(toMove, i, j, idelta, jdelta) {
+        var removeFromField = false;
+
         if (i + idelta < 0 || i + idelta >= this.fld.length) {
-            console.log(this.toString());
-            throw CAN_T_MOVE_WALL;
+            removeFromField = true;
+
+            if (toMove == COCKROACH) {
+                console.log(this.toString());
+                throw CAN_T_MOVE_WALL;
+            }
+        } else if (j + jdelta < 0 || j + jdelta >= this.fld[0].length)  {
+            removeFromField = true;
+
+            if (toMove == COCKROACH) {
+                console.log(this.toString());
+                throw CAN_T_MOVE_WALL;
+            }
         }
 
-        if (j + jdelta < 0 || j + jdelta >= this.fld[0].length)  {
-            console.log(this.toString());
-            throw CAN_T_MOVE_WALL;
-        }
-
-        var possiblyEmpty = this.fld[i + idelta][j + jdelta];
+        var possiblyEmpty = EMPTY;
+        if (!removeFromField)
+            possiblyEmpty = this.fld[i + idelta][j + jdelta];
 
         if (possiblyEmpty != EMPTY)
             this.move0(possiblyEmpty, i + idelta, j + jdelta, idelta, jdelta);
 
         this.fld[i][j] = EMPTY;
-        this.fld[i + idelta][j + jdelta] = toUp;
+
+        if (!removeFromField)
+            this.fld[i + idelta][j + jdelta] = toMove;
 
         return possiblyEmpty;
     }

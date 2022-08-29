@@ -82,21 +82,31 @@ public class Field {
     }
 
     private char move0(char toUp, int i, int j, int idelta, int jdelta) {
-        if (i + idelta < 0 || i + idelta >= fld.size())
-            throw new RuntimeException(CAN_T_MOVE_WALL);
-
-        if (j + jdelta < 0 || j + jdelta >= fld.get(0).length) {
-            System.out.println(this);
-            throw new RuntimeException(CAN_T_MOVE_WALL);
+        boolean remove = false;
+        if (i + idelta < 0 || i + idelta >= fld.size()) {
+            remove = true;
+            if (toUp == COCKROACH)
+                throw new RuntimeException(CAN_T_MOVE_WALL);
         }
 
-        char possiblyEmpty = fld.get(i + idelta)[j + jdelta];
+        if (j + jdelta < 0 || j + jdelta >= fld.get(0).length) {
+            remove = true;
+            if (toUp == COCKROACH)
+                throw new RuntimeException(CAN_T_MOVE_WALL);
+        }
+
+        char possiblyEmpty = EMPTY;
+
+        if (!remove)
+            possiblyEmpty = fld.get(i + idelta)[j + jdelta];
 
         if (possiblyEmpty != EMPTY)
             move0(possiblyEmpty, i + idelta, j + jdelta, idelta, jdelta);
 
         fld.get(i)[j] = EMPTY;
-        fld.get(i + idelta)[j + jdelta] = toUp;
+
+        if (!remove)
+            fld.get(i + idelta)[j + jdelta] = toUp;
 
         return possiblyEmpty;
     }

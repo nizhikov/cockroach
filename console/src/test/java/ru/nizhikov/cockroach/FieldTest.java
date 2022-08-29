@@ -109,6 +109,8 @@ public class FieldTest {
         );
         assertArrayEquals(new int[] {1, 0}, f.position());
 
+        f.up();
+
         assertThrows(RuntimeException.class, f::up, CAN_T_MOVE_WALL);
     }
 
@@ -144,6 +146,8 @@ public class FieldTest {
         );
         assertArrayEquals(new int[] {2, 0}, f.position());
 
+        f.down();
+
         assertThrows(RuntimeException.class, f::down, CAN_T_MOVE_WALL);
     }
 
@@ -163,6 +167,8 @@ public class FieldTest {
         assertEquals("A~___\n", f.toString());
         assertArrayEquals(new int[] {0, 1}, f.position());
 
+        f.left();
+
         assertThrows(RuntimeException.class, f::left, CAN_T_MOVE_WALL);
     }
 
@@ -181,6 +187,11 @@ public class FieldTest {
 
         assertEquals("__~A\n", f.toString());
         assertArrayEquals(new int[] {0, 2}, f.position());
+
+        f.right();
+
+        assertEquals("___~\n", f.toString());
+        assertArrayEquals(new int[] {0, 3}, f.position());
 
         assertThrows(RuntimeException.class, f::right, CAN_T_MOVE_WALL);
     }
