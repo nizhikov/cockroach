@@ -56,6 +56,10 @@
 
         .cm-selectionMatch {
           background-color: inherit !important;
+        }
+
+        .modal-body {
+          overflow-y: scroll;
         }</style>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.css">
@@ -80,7 +84,7 @@
                 </ul>
               </li>
               <li class="nav-item dropdown">
-                <a class="nav-link" href="#" role="button" aria-expanded="false">Справка</a>
+                <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#help-dialog">Справка</a>
               </li>
             </ul>
             <ul class="navbar-nav ms-auto">
@@ -177,10 +181,47 @@
         </div>
       </div>
     </div>
+    <div class="modal fade" id="help-dialog" tabindex="-1" aria-labelledby="help-dialog-label" aria-hidden="true">
+      <div class="modal-dialog" role="document" style="height: 90%;">
+        <div class="modal-content" style="height: 100%">
+          <div class="modal-header">
+            <h5 class="modal-title">Справка</h5>
+          </div>
+          <div class="modal-body" style="height: 95%">
+            <h5>Окно
+            <p>Слева - поле кукарачи. Возможные действия:</p>
+            <ul>
+              <li><b>Поставить букву</b> - выделите клетку кликнув на ней. Нажмите букву на клавиатуре.</li>
+              <li><b>Изменить букву</b> - выделите клетку с буквой кликнув на ней. Нажмите букву на клавиатуре.</li>
+              <li><b>Переместить букву</b> - выделите клетку с буквой кликнув на ней. Клините на другую клетку.</li>
+              <li><b>Переместить кукарачу</b> - выделите клетку с буквой кликнув на ней. Клините на другую клетку.</li>
+              <li><b>Изменить размер</b> - Введите новые размеры внизу и нажмите кнопку "Изменить".</li>
+            </ul>
+            <p>Справа - окно редактирования программы. Вводите здесь команды кукарачи. Поля "Предыдущая", "Следующая", "Толкнул" помогут при поиске ошибке.<br>Кнопки:</p>
+            <ul>
+              <li><b>Сбросить</b> - возвращает поле к состоянию до последнего запуска программы.</li>
+              <li><b>Выполнить</b> - Выполняет всю программу.</li>
+              <li><b>Выполнить по шагам</b> - выполняет программу по шагам. Шаг выполняется после нажатия кнопки "Следующая" внизу окна программы.</li>
+            </ul>
+            <p>Команды, которые поддерживает кукарача:</p>
+            <ul>
+              <li><b>ВВЕРХ, ВНИЗ, ВЛЕВО, ВПРАВО</b> - сдвигает кукарачу на 1 клетку в соответствующем направлении</li>
+              <li><b>{ <список команд="" }<="" b=""> - Составная команда. Объединение нескольких команд в одну.</список></b></li>
+              <li><b>ПОВТОРИ <число> <команда></команда></число></b> - Цикл ПОВТОРИ. Повторение выполнения команды указанное число раз</li>
+              <li><b>ПОКА <условие> <команда></команда></условие></b> - Цикл ПОКА. Повторение выполнения команды, пока условие имеет значение истина. Проверка условия — перед выполнением команды.</li>
+              <li><b>ЕСЛИ <условие> ТО <команда1> ИНАЧЕ <команда2></команда2></команда1></условие></b> - Команда ветвления. Проверяется условие и выполняется либо <команда1> (при значении условия истина), либо <команда2> (при значении условия ложь). Часть ИНАЧЕ <команда2> может быть опущена</команда2></команда2></команда1></li>
+            </ul>
+          </h5></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal" id="help-close">Закрыть</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
-    <script src="field.6bf66d2b.js"></script>
-    <script src="cockroach-web.7003f9fd.js"></script>
+    <script src="field.72c7b99f.js"></script>
+    <script src="cockroach-web.19c392ac.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.js"></script>
   </body>
 
